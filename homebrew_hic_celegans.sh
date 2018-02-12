@@ -240,7 +240,7 @@ awk '{OFS="\t"; print $4,$1,$2,$6}' ${TAG4}.bed > MERGEREADY${TAG4}.bed
 
 module load perl/intel/5.24.0
 
-perl /home/mrp420/yeast/scripts/bootstrapmerge_geo.pl MERGEREADY${TAG2}.bed MERGEREADY${TAG4}.bed ${TAG5}_MERGED.bed
+perl /home/mrp420/yeast/scripts/merge_interacting_reads.pl MERGEREADY${TAG2}.bed MERGEREADY${TAG4}.bed ${TAG5}_MERGED.bed
 
 echo 'paired end files are matched together'
 
