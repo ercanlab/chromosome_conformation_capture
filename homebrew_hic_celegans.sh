@@ -66,27 +66,31 @@ echo $TAG5
 ## 1) Iterative mapping of each fastq file individually.
 # Location of the bowtie index is hardcoded here. Needs to replaced to run by others. 
 
+#How long are the reads? I need this to be able to trim the reads down to do iterative mapping. As interactions could be present within the read, mapping the whole read could be problematic as some reads could be from several places in the genome.
+TAG10=$(head -1 ${TAG1} | cut -d"=" -f2)
+
+
 #Iterative mapping of the first fastq file
-bowtie -q -5 1 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP50.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG1} ${TAG5}/${TAG2}/mapping/L_50.sam
-bowtie -q -5 1 -3 5 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP45.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP50.fastq ${TAG5}/${TAG2}/mapping/L_45.sam
-bowtie -q -5 1 -3 10 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP40.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP45.fastq ${TAG5}/${TAG2}/mapping/L_40.sam
-bowtie -q -5 1 -3 15 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP35.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP40.fastq ${TAG5}/${TAG2}/mapping/L_35.sam
-bowtie -q -5 1 -3 20 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP30.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP35.fastq ${TAG5}/${TAG2}/mapping/L_30.sam
-bowtie -q -5 1 -3 25 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP25.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP30.fastq ${TAG5}/${TAG2}/mapping/L_25.sam
-bowtie -q -5 1 -3 30 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP20.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP25.fastq ${TAG5}/${TAG2}/mapping/L_20.sam
-bowtie -q -5 1 -3 35 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP15.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP20.fastq ${TAG5}/${TAG2}/mapping/L_15.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 50 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP50.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG1} ${TAG5}/${TAG2}/mapping/L_50.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 45 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP45.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP50.fastq ${TAG5}/${TAG2}/mapping/L_45.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 40 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP40.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP45.fastq ${TAG5}/${TAG2}/mapping/L_40.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 35 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP35.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP40.fastq ${TAG5}/${TAG2}/mapping/L_35.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 30 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP30.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP35.fastq ${TAG5}/${TAG2}/mapping/L_30.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 25 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP25.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP30.fastq ${TAG5}/${TAG2}/mapping/L_25.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 20 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP20.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP25.fastq ${TAG5}/${TAG2}/mapping/L_20.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 15 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP15.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP20.fastq ${TAG5}/${TAG2}/mapping/L_15.sam
 
 echo 'worm 1 mapped'
 
 #Iterative mapping of the second fastq file
-bowtie -q -5 1 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP50.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG3} ${TAG5}/${TAG4}/mapping/R_50.sam
-bowtie -q -5 1 -3 5 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP45.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP50.fastq ${TAG5}/${TAG4}/mapping/R_45.sam
-bowtie -q -5 1 -3 10 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP40.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP45.fastq ${TAG5}/${TAG4}/mapping/R_40.sam
-bowtie -q -5 1 -3 15 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP35.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP40.fastq ${TAG5}/${TAG4}/mapping/R_35.sam
-bowtie -q -5 1 -3 20 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP30.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP35.fastq ${TAG5}/${TAG4}/mapping/R_30.sam
-bowtie -q -5 1 -3 25 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP25.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP30.fastq ${TAG5}/${TAG4}/mapping/R_25.sam
-bowtie -q -5 1 -3 30 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP20.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP25.fastq ${TAG5}/${TAG4}/mapping/R_20.sam
-bowtie -q -5 1 -3 35 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP15.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP20.fastq ${TAG5}/${TAG4}/mapping/R_15.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 50-v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP50.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG3} ${TAG5}/${TAG4}/mapping/R_50.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 45 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP45.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP50.fastq ${TAG5}/${TAG4}/mapping/R_45.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 40 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP40.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP45.fastq ${TAG5}/${TAG4}/mapping/R_40.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 35 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP35.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP40.fastq ${TAG5}/${TAG4}/mapping/R_35.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 30 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP30.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP35.fastq ${TAG5}/${TAG4}/mapping/R_30.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 25 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP25.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP30.fastq ${TAG5}/${TAG4}/mapping/R_25.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 20 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP20.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP25.fastq ${TAG5}/${TAG4}/mapping/R_20.sam
+bowtie -q -5 1 -3 expr ${TAG10} - 15 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP15.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP20.fastq ${TAG5}/${TAG4}/mapping/R_15.sam
 
 echo 'worm 2 mapped'
 
@@ -295,7 +299,3 @@ echo 'End Time'
 echo $(date +%x_%r)
 
 exit 0;
-
-
-
-
