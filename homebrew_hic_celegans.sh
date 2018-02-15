@@ -1,301 +1,364 @@
-#!/bin/sh
-#
-#SBATCH --verbose
-#SBATCH --job-name=homebrew_hic
-#SBATCH --output=/scratch/mrp420/reports/slurm_homebrew_%j.out
-#SBATCH --error=/scratch/mrp420/reports/slurm_homebrew_%j.err
-#SBATCH --time=24:00:00
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=20
-#SBATCH --mem=60GB
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=mrp420@nyu.edu
-
 #################################
-#    Homebrew HiC C. elegans    #
+#    in-silico 4C C. elegans    #
 #################################
 
-# This script will take paired end data from HiC experiments and prodce a list of every pairwise intraction between restriction fragment 
-# ends (fends). This is a multi-step process:
-# 1) Iterative mapping of each fastq file individually
-# 2) Convert mapped files to bed format
-# 3) Assign paired ends back together
-# 4) Subset to inter and intra chromosomal interactions
-# 5) Filter out interactions that are less then 1kb apart, and don't have a >1 restriction site between them. 
-# 6) Assign each interaction to the adjacent fend
+# This script will look in the two sets of chromosome conformation data produced by the Meyer lab (2015 and 2017) and export plots
+# that show interaction counts with a specific region of interest (4C analysis). 
+
+# Chromosome conformation data has already been processed using the homebrew pipeline to produce a list of every interaction mapped to 
+# their fragment ends.
 
 # Required inputs
-#A-fastq file 1. 
-#B-fastq file 2. 
-#C-bed file containing position of all the restriction sites
+#A-Left boundary of region. 
+#B-right boundary of region. 
+#C-chromosome
+#D-binsize
+#E-Output directory
+#F-Output ID
 
 #Example input for NYU HPC:
-##sbatch --export arg1='/scratch/cgsb/ercan/GEO/2015_meyer/SDC2B12015_X_X_R1_X.fastq',arg2='/scratch/cgsb/ercan/GEO/2015_meyer/SDC2B12015_X_X_R2_X.fastq',arg3='/home/mrp420/worms/restrict/CelegansMboI.bed' ~/worms/scripts/homebrew_hic_elegeans_geo.sh
-
-module load bowtie/gnu/1.2.0
-
-#Start time
-echo 'Start Time'
-echo $(date +%x_%r)
-
-# Lets get the input variables and generate new variables from them. This is specific to the naming format of fastqs that NYU gencore used 
-# to give out their sequnceing runs (SEQID_X_X_R1orR2_X.fastq). Fastqs must be converted to this format, or this section can be modified 
-# to accept differnt input types.
-
-TAG1=$arg1
-TAG7=$( echo ${TAG1}|awk -F '[/_]' '{print $8"_"$11}' )
-TAG3=$arg2
-TAG9=$( echo ${TAG3}|awk -F '[/_]' '{print $8"_"$11}' )
-TAG5=$( echo ${TAG3}|awk -F '[/_]' '{print $8}' )
-TAG2=$(echo ${TAG7})
-TAG4=$(echo ${TAG9})
-
-#Lets create the output directories
-#This is coded to output into my directory. Needs to be recoded to output into desired location throughout the pipeline. 
-cd /scratch/mrp420/homebrew_hic
-mkdir ${TAG5}
-mkdir ${TAG5}/${TAG2}
-mkdir ${TAG5}/${TAG2}/mapping
-mkdir ${TAG5}/${TAG4}
-mkdir ${TAG5}/${TAG4}/mapping
-TAG6=$arg3
-
-#Output the library identifier to the error report
-echo $TAG5
-
-## 1) Iterative mapping of each fastq file individually.
-# Location of the bowtie index is hardcoded here. Needs to replaced to run by others. 
-
-#Iterative mapping of the first fastq file
-bowtie -q -5 1 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP50.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG1} ${TAG5}/${TAG2}/mapping/L_50.sam
-bowtie -q -5 1 -3 5 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP45.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP50.fastq ${TAG5}/${TAG2}/mapping/L_45.sam
-bowtie -q -5 1 -3 10 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP40.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP45.fastq ${TAG5}/${TAG2}/mapping/L_40.sam
-bowtie -q -5 1 -3 15 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP35.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP40.fastq ${TAG5}/${TAG2}/mapping/L_35.sam
-bowtie -q -5 1 -3 20 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP30.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP35.fastq ${TAG5}/${TAG2}/mapping/L_30.sam
-bowtie -q -5 1 -3 25 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP25.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP30.fastq ${TAG5}/${TAG2}/mapping/L_25.sam
-bowtie -q -5 1 -3 30 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP20.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP25.fastq ${TAG5}/${TAG2}/mapping/L_20.sam
-bowtie -q -5 1 -3 35 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG2}/mapping/L_UNMAP15.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG2}/mapping/L_UNMAP20.fastq ${TAG5}/${TAG2}/mapping/L_15.sam
-
-echo 'worm 1 mapped'
-
-#Iterative mapping of the second fastq file
-bowtie -q -5 1 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP50.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG3} ${TAG5}/${TAG4}/mapping/R_50.sam
-bowtie -q -5 1 -3 5 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP45.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP50.fastq ${TAG5}/${TAG4}/mapping/R_45.sam
-bowtie -q -5 1 -3 10 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP40.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP45.fastq ${TAG5}/${TAG4}/mapping/R_40.sam
-bowtie -q -5 1 -3 15 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP35.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP40.fastq ${TAG5}/${TAG4}/mapping/R_35.sam
-bowtie -q -5 1 -3 20 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP30.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP35.fastq ${TAG5}/${TAG4}/mapping/R_30.sam
-bowtie -q -5 1 -3 25 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP25.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP30.fastq ${TAG5}/${TAG4}/mapping/R_25.sam
-bowtie -q -5 1 -3 30 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP20.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP25.fastq ${TAG5}/${TAG4}/mapping/R_20.sam
-bowtie -q -5 1 -3 35 -v 0 -m 1 -p 8 --un ${TAG5}/${TAG4}/mapping/R_UNMAP15.fastq --seed=123 -S /home/mrp420/worms/genomes/WS220/WS220_ucsc ${TAG5}/${TAG4}/mapping/R_UNMAP20.fastq ${TAG5}/${TAG4}/mapping/R_15.sam
-
-echo 'worm 2 mapped'
-
-## 2) Convert mapped files to bed format
-
-module load samtools/intel/1.3.1
-module load bedtools/intel/2.26.0 
-
-cd /scratch/mrp420/homebrew_hic/${TAG5}/${TAG2}/mapping
-
-rm *.fastq
-
-#Convert my files to a bed file
-samtools view -b -S L_50.sam > L_50.bam
-samtools view -h -F 4 -b L_50.bam > L_50_mapped.bam
-bedtools bamtobed -i L_50_mapped.bam > L_50_mapped.bed
-
-samtools view -b -S L_45.sam > L_45.bam
-samtools view -h -F 4 -b L_45.bam > L_45_mapped.bam
-bedtools bamtobed -i L_45_mapped.bam > L_45_mapped.bed
-
-samtools view -b -S L_40.sam > L_40.bam
-samtools view -h -F 4 -b L_40.bam > L_40_mapped.bam
-bedtools bamtobed -i L_40_mapped.bam > L_40_mapped.bed
-
-samtools view -b -S L_35.sam > L_35.bam
-samtools view -h -F 4 -b L_35.bam > L_35_mapped.bam
-bedtools bamtobed -i L_35_mapped.bam > L_35_mapped.bed
-
-samtools view -b -S L_30.sam > L_30.bam
-samtools view -h -F 4 -b L_30.bam > L_30_mapped.bam
-bedtools bamtobed -i L_30_mapped.bam > L_30_mapped.bed
-
-samtools view -b -S L_25.sam > L_25.bam
-samtools view -h -F 4 -b L_25.bam > L_25_mapped.bam
-bedtools bamtobed -i L_25_mapped.bam > L_25_mapped.bed
-
-samtools view -b -S L_20.sam > L_20.bam
-samtools view -h -F 4 -b L_20.bam > L_20_mapped.bam
-bedtools bamtobed -i L_20_mapped.bam > L_20_mapped.bed
-
-samtools view -b -S L_15.sam > L_15.bam
-samtools view -h -F 4 -b L_15.bam > L_15_mapped.bam
-bedtools bamtobed -i L_15_mapped.bam > L_15_mapped.bed
-
-echo 'worm 1 file is converted'
-
-rm *.bam
-rm *.sam
-
-#Merge the bed files
-cat L_15_mapped.bed L_20_mapped.bed L_25_mapped.bed L_30_mapped.bed L_35_mapped.bed L_40_mapped.bed L_45_mapped.bed L_50_mapped.bed > ../..//${TAG2}.bed
-
-echo 'worm 1 files are collated'
-
-#Report out the mapping efficiencyl
-rm ../../${TAG5}_report 
-
-echo "Total mapped reads" ${TAG7} >> ../../${TAG5}_report
-wc -l ../../${TAG7}.bed >> ../../${TAG5}_report
-
-echo "Mapped reads - " >> ../${TAG5}_report
-wc -l L_50_mapped.bed >> ../../${TAG5}_report  
-wc -l L_45_mapped.bed >> ../../${TAG5}_report  
-wc -l L_40_mapped.bed >> ../../${TAG5}_report  
-wc -l L_35_mapped.bed >> ../../${TAG5}_report  
-wc -l L_30_mapped.bed >> ../../${TAG5}_report  
-wc -l L_25_mapped.bed >> ../../${TAG5}_report  
-wc -l L_20_mapped.bed >> ../../${TAG5}_report  
-wc -l L_15_mapped.bed >> ../../${TAG5}_report    
-
-echo "Total mapped reads - " ${TAG2} >> ../..//${TAG5}_report
-wc -l ../../${TAG2}.bed >> ../..//${TAG5}_report
-
-rm *.bed
-
-echo 'worm 1 files are counted'
-
-cd /scratch/mrp420/homebrew_hic/${TAG5}/${TAG4}/mapping
-
-rm *.fastq
-
-samtools view -b -S R_50.sam > R_50.bam
-samtools view -h -F 4 -b R_50.bam > R_50_mapped.bam
-bedtools bamtobed -i R_50_mapped.bam > R_50_mapped.bed
-
-samtools view -b -S R_45.sam > R_45.bam
-samtools view -h -F 4 -b R_45.bam > R_45_mapped.bam
-bedtools bamtobed -i R_45_mapped.bam > R_45_mapped.bed
-
-samtools view -b -S R_40.sam > R_40.bam
-samtools view -h -F 4 -b R_40.bam > R_40_mapped.bam
-bedtools bamtobed -i R_40_mapped.bam > R_40_mapped.bed
-
-samtools view -b -S R_35.sam > R_35.bam
-samtools view -h -F 4 -b R_35.bam > R_35_mapped.bam
-bedtools bamtobed -i R_35_mapped.bam > R_35_mapped.bed
-
-samtools view -b -S R_30.sam > R_30.bam
-samtools view -h -F 4 -b R_30.bam > R_30_mapped.bam
-bedtools bamtobed -i R_30_mapped.bam > R_30_mapped.bed
-
-samtools view -b -S R_25.sam > R_25.bam
-samtools view -h -F 4 -b R_25.bam > R_25_mapped.bam
-bedtools bamtobed -i R_25_mapped.bam > R_25_mapped.bed
-
-samtools view -b -S R_20.sam > R_20.bam
-samtools view -h -F 4 -b R_20.bam > R_20_mapped.bam
-bedtools bamtobed -i R_20_mapped.bam > R_20_mapped.bed
-
-samtools view -b -S R_15.sam > R_15.bam
-samtools view -h -F 4 -b R_15.bam > R_15_mapped.bam
-bedtools bamtobed -i R_15_mapped.bam > R_15_mapped.bed
-
-echo 'worm 2 file is converted'
-
-rm *.bam
-rm *.sam
-
-cat R_15_mapped.bed R_20_mapped.bed R_25_mapped.bed R_30_mapped.bed R_35_mapped.bed R_40_mapped.bed R_45_mapped.bed R_50_mapped.bed > ../..//${TAG4}.bed
-
-echo 'worm 2 files are collated'
-
-echo "Total mapped reads" ${TAG9} >> ../../${TAG5}_report
-wc -l ../../${TAG9}.bed >> ../../${TAG5}_report
-
-echo "Mapped reads - " >> ../${TAG5}_report
-wc -l R_50_mapped.bed >> ../../${TAG5}_report  
-wc -l R_45_mapped.bed >> ../../${TAG5}_report  
-wc -l R_40_mapped.bed >> ../../${TAG5}_report  
-wc -l R_35_mapped.bed >> ../../${TAG5}_report  
-wc -l R_30_mapped.bed >> ../../${TAG5}_report  
-wc -l R_25_mapped.bed >> ../../${TAG5}_report  
-wc -l R_20_mapped.bed >> ../../${TAG5}_report  
-wc -l R_15_mapped.bed >> ../../${TAG5}_report    
-
-echo "Total mapped reads - " ${TAG4} >> ../../${TAG5}_report
-wc -l ../../${TAG4}.bed >> ../../${TAG5}_report
-
-rm *.bed
-
-echo 'worm 2 files are counted'
-
-
-## 3) Assign paired ends back together
-
-cd /scratch/mrp420/homebrew_hic/${TAG5}/
-
-awk '{OFS="\t"; print $4,$1,$2,$6}' ${TAG2}.bed > MERGEREADY${TAG2}.bed
-awk '{OFS="\t"; print $4,$1,$2,$6}' ${TAG4}.bed > MERGEREADY${TAG4}.bed
-
-module load perl/intel/5.24.0
-
-perl /home/mrp420/yeast/scripts/merge_interacting_reads.pl MERGEREADY${TAG2}.bed MERGEREADY${TAG4}.bed ${TAG5}_MERGED.bed
-
-echo 'paired end files are matched together'
-
-echo "Mapped reads in both pairs - no rDNA" ${TAG5} >> ${TAG5}_report
-wc -l ${TAG5}_MERGED.bed >> ${TAG5}_report
-
-## 4) Subset to inter and intra chromosomal interactions
-
-awk '{OFS="\t"} {if ($2 == $5) print $2,$3,$6,$4,$7,$1}' ${TAG5}_MERGED.bed > ${TAG5}_intra.bed
-
-awk '{OFS="\t"} {if ($2 < $3) print $1,$2,$3,$4,$5,$6;
-else
-print $1,$3,$2,$4,$5,$6;
-}' ${TAG5}_intra.bed > ${TAG5}_intrasorted.bed
-awk '{OFS="\t"} {if ($2 != $5) print $2,$3,$5,$6,$4,$7,$1}' ${TAG5}_MERGED.bed > ${TAG5}_inter.bed
-
-echo 'intra and inter interactions are seperated from each other'
-
-echo "Intrachromsomal(Prefilter)" ${TAG5} >> ${TAG5}_report
-wc -l ${TAG5}_intrasorted.bed >> ${TAG5}_report
-
-echo "Interchromosomal" ${TAG5} >> ${TAG5}_report
-wc -l ${TAG5}_inter.bed >> ${TAG5}_report
-
-## 5) Filter out interactions that are less then 1kb apart, and don't have a >1 restriction site between them. 
-
-bedtools intersect -u -a ${TAG5}_intrasorted.bed -b ${TAG6} > ${TAG5}_withrestrict.bed
-
-echo 'interactions that have at least one restriction site between them are filtered out'
-
-echo "Intrachromsomal with Restriction Site" ${TAG5} >> ${TAG5}_report
-wc -l ${TAG5}_withrestrict.bed >> ${TAG5}_report
-
-echo ${TAG6} >> ${TAG5}_report
-
-echo "Intrachromsomal with over 1000bp" ${TAG5} >> ${TAG5}_report
-awk '{OFS="\t"} {if ($3-$2 >= 1000) print $1,$2,$1,$3,$4,$5,$6}' ${TAG5}_withrestrict.bed > ${TAG5}.bed
-wc -l ${TAG5}.bed >> ${TAG5}_report
-
-echo 'interactions must be at least 1kb apart'
-
-## 6) Assign each interaction to the adjacent fend
-
-module load r/intel/3.3.2
-
-Rscript ~/worms/scripts/fends_elegans.R ${TAG6} ${TAG5}.bed ${TAG5}_inter.bed > outputFile${PBS_JOBID}.Rout 2>&1
-
-echo 'interactions are assigned to fends'
-
-#End time
-echo 'End Time'
-echo $(date +%x_%r)
-
-exit 0;
-
-
-
-
+##Rscript ~/worms/scripts/insilico_4C.R 11094135 11094136 chrX 10000 /scratch/mrp420/ rex8 > outputFile_1.Rout 2>&1
+
+#Arguments reported to ouptut file.
+print('Script started')
+Sys.time()
+args <- commandArgs(trailingOnly=TRUE)
+print(paste0('These are the args:',args))
+query_region<-args
+query_region[c(1,2,4)]<-as.numeric(query_region[c(1,2,4)])
+
+#Test inputs - used for troubleshooting the script
+#query_region<-c(806676,806677,'chrX',10000,'/scratch/mrp420/','rex40')
+
+#Read in the data files - these are the list of fends from the meyer data. These directories are avaliable to members of the Ercan lab.  
+#The equivalent files can be generated by running homebrew piepline on the meyer data.
+
+#Intra-chromosomal files first
+N2B12015<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/N2B12015_intra_fends', stringsAsFactors=F)
+N2B22015<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/N2B22015_intra_fends', stringsAsFactors=F)
+#SDC2B12015<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/SDC2B12015_intra_fends', stringsAsFactors=F)
+#SDC2B22015<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/SDC2B22015_intra_fends', stringsAsFactors=F)
+
+N2B1<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/N2B1_intra_fends', stringsAsFactors=F)
+N2B2<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/N2B2_intra_fends', stringsAsFactors=F)
+SDC2B1<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/SDC2B1_intra_fends', stringsAsFactors=F)
+SDC2B2<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/SDC2B2_intra_fends', stringsAsFactors=F)
+
+#Inter-chromosomal files second
+N2B12015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/N2B12015_inter_fends', stringsAsFactors=F)
+N2B22015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/N2B22015_inter_fends', stringsAsFactors=F)
+#SDC2B12015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/SDC2B12015_inter_fends', stringsAsFactors=F)
+#SDC2B22015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/SDC2B22015_inter_fends', stringsAsFactors=F)
+
+N2B1_inter<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/N2B1_inter_fends', stringsAsFactors=F)
+N2B2_inter<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/N2B2_inter_fends', stringsAsFactors=F)
+SDC2B1_inter<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/SDC2B1_inter_fends', stringsAsFactors=F)
+SDC2B2_inter<-read.table('/scratch/cgsb/ercan/GEO/2017_meyer/interactions/SDC2B2_inter_fends', stringsAsFactors=F)
+
+
+##NEED TO CARRY ON WITH INTER. LASTLY MAYBE SORT OUTPUTS SO CREATES A LITTLE DIRECTORY AS SO MANY OUTPUTS. TABLE OUTPUTS AS WELL!
+
+
+#Ercan lab defined Rex sites are read in for graphing purposes
+rex_sites<-read.table('/scratch/cgsb/ercan/Defined_regions/rex_sites', stringsAsFactors=F)
+print('Input files opened')
+
+#Define chromosome names and lengths
+chr.length <- list("chrI" = 15072423, "chrII" = 15279345, "chrIII" = 13783700, "chrIV" = 17493793, "chrV" = 20924149, "chrX" = 17718866, "chrMtDNA" = 13794)
+chr.names <-names(chr.length)
+
+#Define the region of interest based on the binsize. This utilises the midpoint. Some modification to this definition of the bins might be 
+#required if you want to look for a large region that is bigger then a bin. 
+left_boundary<-as.numeric(query_region[1])-(as.numeric(query_region[4])/2)
+right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
+midpoint <-(left_boundary+right_boundary)/2
+
+#Define an output name
+output_name<-paste0(query_region[6],'_',query_region[4],'bins')
+
+#Create a function that will run on each dataset, to create a matrix of intra chromosomal interactions. These outputs will then be used to graph my 
+#viewpoint data
+slid_bins<-function(input_table) {
+
+input_name<-deparse(substitute(input_table))
+
+#Output ID
+output_ID<-paste0(query_region[6],'_',input_name,'_',query_region[4],'bins')
+
+#Find all interactions from your reigon of interest
+left_hits<-which(input_table[,1]==query_region[3]&input_table[,2]>left_boundary&input_table[,2]<right_boundary)
+right_hits<-which(input_table[,3]==query_region[3]&input_table[,4]>left_boundary&input_table[,4]<right_boundary)
+
+#Remove all in which both ends are in your region of interest
+left_partner<-input_table[left_hits,4]
+right_partner<-input_table[right_hits,2]
+
+left_ROI<-left_partner[-which(left_partner>left_boundary&left_partner<right_boundary)]
+right_ROI<-right_partner[-which(right_partner>left_boundary&right_partner<right_boundary)]
+
+#Add both potential directions of inteaction together.
+total_ROI<-c(left_ROI,right_ROI)
+print('Region of interest defined')
+
+#Counts are generated for each 10Kb window
+counted_ROI<-table(floor(total_ROI/as.numeric(query_region[4])))
+
+#Mainpulate the rex sites so they can be graphed 
+pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
+
+#how many bins are there over the chr
+bin_number<-chr.length[[query_region[3]]]/as.numeric(query_region[4])
+full_table<-matrix(0,bin_number,2)
+full_table[,1]<-1:bin_number
+#get the distances that have values in the table
+my_header<-as.numeric(names(counted_ROI))
+#Put the values for the table in a dat matrix for every position.
+for (i in 1:length(my_header)){
+  index<-which(full_table[,1]==my_header[i])
+  full_table[index,2]<-counted_ROI[i]
+}
+
+#Next need to create sliding average. 
+sliding_bins<-matrix(0,(bin_number-2),2)
+sliding_bins[,1]<-2:(bin_number-1)
+
+for (i in 1:nrow(sliding_bins)){
+  sliding_bins[i,2]<-(sum(full_table[i,2]+full_table[i+1,2], full_table[i+2,2]))/3
+  }
+
+dashpoint<-c(log10(max(sliding_bins))/3,log10(max(sliding_bins))/3+log10(max(sliding_bins))/20,log10(max(sliding_bins))/3+2*(log10(max(sliding_bins))/20))
+assign(paste0(input_name,'sliding_bins'), sliding_bins)
+assign(paste0(input_name,'full_table'),full_table)
+
+output<-list(get(paste0(input_name,'sliding_bins')),get(paste0(input_name,'full_table')),dashpoint)
+return(output)
+}
+
+#Lets use the function to create the matrices of interactions across chrX
+N2B1_tables<-slid_bins(N2B1)
+N2B2_tables<-slid_bins(N2B2)
+SDC2B1_tables<-slid_bins(SDC2B1)
+SDC2B2_tables<-slid_bins(SDC2B2)
+
+N2B12015_tables<-slid_bins(N2B12015)
+N2B22015_tables<-slid_bins(N2B22015)
+#SDC2B12015_tables<-slid_bins(SDC2B12015)
+#SDC2B22015_tables<-slid_bins(SDC2B22015)
+
+#Names for my lists of matrices
+datapoints_2017<-c('N2B1_tables','N2B2_tables','SDC2B1_tables','SDC2B2_tables')
+datapoints_2015<-c('N2B12015_tables','N2B22015_tables')#,'SDC2B12015_tables','SDC2B22015_tables')
+
+#Mainpulate the top rex sites so they can be graphed 
+pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
+
+#define graph parameters
+library(wesanderson)
+col<-wes_palette("GrandBudapest2")
+
+#Plot out the raw counts 2015
+output1<-paste0(query_region[5],output_name,'_2015_raw_counts.pdf')
+
+pdf(output1)
+par(mfrow=c(2,2))
+for(i in 1:4){
+my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
+plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(counts per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,seq(0,chr.length[[query_region[3]]]/10000,by=200)))
+axis(1, at=seq(0,chr.length[[query_region[3]]]/10000,by=200), labels=seq(0,chr.length[[query_region[3]]]/10000,by=200))
+if(query_region[3]=='chrX'){
+text(pos+40, matrix(get(datapoints_2015[i])[[3]][3],1,17),cex=0.6, labels=rex_sites[1:17,5], srt=45)
+segments(pos, matrix(get(datapoints_2015[i])[[3]][1],1,17),pos, y1 = matrix(get(datapoints_2015[i])[[3]][2],1,17), col=col[1], lwd=2)
+}
+segments(midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]),midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]), col=col[2], lwd=2)
+text(midpoint/as.numeric(query_region[4])+40, (datapoints_2015[i])[[3]][3]),cex=0.6, labels='BAIT', srt=45)
+}
+dev.off()
+
+output1<-paste0(query_region[5],output_name,'_2017_raw_counts.pdf')
+
+pdf(output1)
+par(mfrow=c(2,2))
+for(i in 1:4){
+my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
+plot(get(datapoints_2017[i])[[2]][,1],log10(get(datapoints_2017[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(counts per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,chr.length[[query_region[3]]]/10000))
+axis(1, at=seq(0,chr.length[[query_region[3]]]/10000,by=200), labels=seq(0,chr.length[[query_region[3]]]/10000,by=200))
+if(query_region[3]=='chrX'){
+text(pos+40, matrix(get(datapoints_2017[i])[[3]][3],1,17),cex=0.6, labels=rex_sites[1:17,5], srt=45)
+segments(pos, matrix(get(datapoints_2017[i])[[3]][1],1,17),pos, y1 = matrix(get(datapoints_2017[i])[[3]][2],1,17), col=col[1], lwd=2)
+}
+segments(midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]),midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]), col=col[2], lwd=2)
+text(midpoint/as.numeric(query_region[4])+40, (datapoints_2015[i])[[3]][3]),cex=0.6, labels='BAIT', srt=45)
+}
+dev.off()
+
+
+print('Raw counts plotted')
+
+
+#Output the graph of sliding average.
+output2<-paste0(query_region[5],output_name,'_2015_slidingwindow.pdf')
+
+pdf(output2)
+par(mfrow=c(2,1))
+for(i in 1:2){
+my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
+plot(get(datapoints_2015[i])[[1]][,1],log10(get(datapoints_2015[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(counts per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,chr.length[[query_region[3]]]/10000))
+axis(1, at=seq(0,chr.length[[query_region[3]]]/10000,by=200), labels=seq(0,chr.length[[query_region[3]]]/10000,by=200))
+if(query_region[3]=='chrX'){
+text(pos+40, matrix(get(datapoints_2015[i])[[3]][3],1,17),cex=0.8, labels=rex_sites[1:17,5], srt=45)
+segments(pos, matrix(get(datapoints_2015[i])[[3]][1],1,17),pos, y1 = matrix(get(datapoints_2015[i])[[3]][2],1,17), col=col[1], lwd=2)
+}
+segments(midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]),midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]), col=col[2], lwd=2)
+text(midpoint/as.numeric(query_region[4])+40, (datapoints_2015[i])[[3]][3]),cex=0.6, labels='BAIT', srt=45)
+}
+dev.off()
+
+output2<-paste0(query_region[5],output_name,'_2017_slidingwindow.pdf')
+
+pdf(output2)
+par(mfrow=c(2,1))
+for(i in 1:2){
+my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
+plot(get(datapoints_2017[i])[[1]][,1],log10(get(datapoints_2017[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(counts per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,chr.length[[query_region[3]]]/10000))
+axis(1, at=seq(0,chr.length[[query_region[3]]]/10000,by=200), labels=seq(0,chr.length[[query_region[3]]]/10000,by=200))
+if(query_region[3]=='chrX'){
+text(pos+40, matrix(get(datapoints_2017[i])[[3]][3],1,17),cex=0.8, labels=rex_sites[1:17,5], srt=45)
+segments(pos, matrix(get(datapoints_2017[i])[[3]][1],1,17),pos, y1 = matrix(get(datapoints_2017[i])[[3]][2],1,17), col=col[1], lwd=2)
+}
+segments(midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]),midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]), col=col[2], lwd=2)
+text(midpoint/as.numeric(query_region[4])+40, (datapoints_2015[i])[[3]][3]),cex=0.6, labels='BAIT', srt=45)
+}
+dev.off()
+
+
+print('Sliding window chart plotted')
+
+#Lets deal with inter-chromosomal interactions now. 
+
+#Create a function that will run on each dataset, to create a matrix of inter chromosomal interactions. These outputs will then be used to graph my 
+#viewpoint data
+slid_bins_inter<-function(input_table) {
+
+input_name<-deparse(substitute(input_table))
+
+#Output ID
+output_ID<-paste0(query_region[6],'_',input_name,'_',query_region[4],'bins')
+
+#Find all interactions from your reigon of interest
+left_hits<-which(input_table[,1]==query_region[3]&input_table[,2]>left_boundary&input_table[,2]<right_boundary)
+right_hits<-which(input_table[,3]==query_region[3]&input_table[,4]>left_boundary&input_table[,4]<right_boundary)
+
+
+#Add both potential directions of inteaction together.
+colnames(input_table)<-c('chr','pos','chr','pos')
+total_ROI<-rbind(input_table[left_hits,c(3,4)],input_table[right_hits,c(1,2)])
+print('Region of interest defined')
+
+#Need to break down into individual chromosomes.
+unique(total_ROI[,1])->inter_chrs
+for(i in 1:length(inter_chrs)){
+chr_specific<-which(total_ROI[,1]==inter_chrs[i])
+assign(paste0(inter_chrs[i],'_interactors'),total_ROI[chr_specific,2])
+}
+
+#Counts are generated for each 10Kb window
+for(i in 1:length(inter_chrs)){
+assign(paste0(inter_chrs[i],'_counts'),table(floor(get(paste0(inter_chrs[i],'_interactors'))/as.numeric(query_region[4]))))
+}
+
+#how many bins are there over each chr
+for(i in 1:length(inter_chrs)){
+bin_number<-chr.length[[inter_chrs[i]]]/as.numeric(query_region[4])
+full_table<-matrix(0,bin_number,2)
+full_table[,1]<-1:bin_number
+#get the distances that have values in the table
+my_header<-as.numeric(names(get(paste0(inter_chrs[i],'_counts'))))
+#Put the values for the table in a dat matrix for every position.
+for (j in 1:length(my_header)){
+  index<-which(full_table[,1]==my_header[j])
+  full_table[index,2]<-get(paste0(inter_chrs[i],'_counts'))[i]
+}
+
+#Next need to create sliding average. 
+
+sliding_bins<-matrix(0,(bin_number-2),2)
+sliding_bins[,1]<-2:(bin_number-1)
+if(bin_number>5){
+for (j in 1:nrow(sliding_bins)){
+  sliding_bins[j,2]<-(sum(full_table[j,2]+full_table[j+1,2], full_table[j+2,2]))/3
+  }
+
+assign(paste0(input_name,'_',inter_chrs[i],'_sliding_bins'), sliding_bins)
+}
+assign(paste0(input_name,'_',inter_chrs[i],'_full_table'),full_table)
+
+if(inter_chrs[i]=='chrX'){
+dashpoint<-c(log10(max(sliding_bins))/3,log10(max(sliding_bins))/3+log10(max(sliding_bins))/20,log10(max(sliding_bins))/3+2*(log10(max(sliding_bins))/20))
+}
+
+print(i)
+}
+
+
+
+output<-lapply(ls(pattern=(paste0(input_name,"_chr"))), get)
+names(output)<-ls(pattern=paste0(input_name,"_chr"))
+
+return(output)
+}
+
+
+#Use function to create lists of matrices
+
+N2B1_tables<-slid_bins_inter(N2B1)
+N2B2_tables<-slid_bins_inter(N2B2)
+SDC2B1_tables<-slid_bins_inter(SDC2B1)
+SDC2B2_tables<-slid_bins_inter(SDC2B2)
+
+N2B12015_tables<-slid_bins_inter(N2B12015)
+N2B22015_tables<-slid_bins_inter(N2B22015)
+#SDC2B12015_tables<-slid_bins_inter(SDC2B12015)
+#SDC2B22015_tables<-slid_bins_inter(SDC2B22015)
+
+
+GRAPH THE OUTPUT
+
+
+#Names for my lists of matrices
+datapoints_2017<-c('N2B1_tables','N2B2_tables','SDC2B1_tables','SDC2B2_tables')
+datapoints_2015<-c('N2B12015_tables','N2B22015_tables')#,'SDC2B12015_tables','SDC2B22015_tables')
+
+#Mainpulate the top rex sites so they can be graphed 
+pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
+
+#define graph parameters
+library(wesanderson)
+col<-wes_palette("GrandBudapest2")
+
+#Plot out the raw counts 2015
+output1<-paste0(query_region[5],output_name,'_2015_raw_counts.pdf')
+
+pdf(output1)
+par(mfrow=c(2,2))
+for(i in 1:4){
+my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
+plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(counts per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,seq(0,chr.length[[query_region[3]]]/10000,by=200)))
+axis(1, at=seq(0,chr.length[[query_region[3]]]/10000,by=200), labels=seq(0,chr.length[[query_region[3]]]/10000,by=200))
+if(query_region[3]=='chrX'){
+text(pos+40, matrix(get(datapoints_2015[i])[[3]][3],1,17),cex=0.6, labels=rex_sites[1:17,5], srt=45)
+segments(pos, matrix(get(datapoints_2015[i])[[3]][1],1,17),pos, y1 = matrix(get(datapoints_2015[i])[[3]][2],1,17), col=col[1], lwd=2)
+}
+segments(midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]),midpoint/as.numeric(query_region[4]), (datapoints_2015[i])[[3]][1]), col=col[2], lwd=2)
+text(midpoint/as.numeric(query_region[4])+40, (datapoints_2015[i])[[3]][3]),cex=0.6, labels='BAIT', srt=45)
+}
+dev.off()
+
+
+
+
+
+
+
+Sys.time()
+
+print('All done! Woop woop!')
