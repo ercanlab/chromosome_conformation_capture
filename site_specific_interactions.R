@@ -69,6 +69,8 @@ N2B12015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/N2B1
 N2B22015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/N2B22015_inter_fends', stringsAsFactors=F)
 SDC2B12015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/SDC2B12015_inter_fends', stringsAsFactors=F)
 SDC2B22015_inter<-read.table('/scratch/cgsb/ercan/GEO/2015_meyer/interactions/SDC2B22015_inter_fends', stringsAsFactors=F)
+print('Files read in succesfully')
+Sys.time()
 
 N2B1<-rbind(N2B1_intra,N2B1_inter)
 N2B2<-rbind(N2B2_intra,N2B2_inter)
@@ -129,7 +131,8 @@ for(j in 1:nrow(my_bed_file) ){
     count<-count1+count2
     outputmatrix[i,j]<-outputmatrix[i,j]+count
   }
-  print(j)}
+  if(j %% 10==0) {
+  print(j)}}
 return(outputmatrix)
 }
 
@@ -138,16 +141,22 @@ interactions<-apply(my_bed_file,1,fend_hits,fends_table=N2B1)
 N2B1_native<-fend_matrix(my_bed_file,fends_table=N2B1,interactions)
 interactions<-apply(my_bed_file_ordered,1,fend_hits,fends_table=N2B1)
 N2B1_ordered<-fend_matrix(my_bed_file_ordered,fends_table=N2B1,interactions)
+print('N2B1 COUNTED')
+Sys.time()
 
 interactions<-apply(my_bed_file,1,fend_hits,fends_table=N2B2)
 N2B2_native<-fend_matrix(my_bed_file,fends_table=N2B2,interactions)
 interactions<-apply(my_bed_file_ordered,1,fend_hits,fends_table=N2B2)
 N2B2_ordered<-fend_matrix(my_bed_file_ordered,fends_table=N2B2,interactions)
+print('N2B2 COUNTED')
+Sys.time()
 
 interactions<-apply(my_bed_file,1,fend_hits,fends_table=SDC2B1)
 SDC2B1_native<-fend_matrix(my_bed_file,fends_table=SDC2B1,interactions)
 interactions<-apply(my_bed_file_ordered,1,fend_hits,fends_table=SDC2B1)
 SDC2B1_ordered<-fend_matrix(my_bed_file_ordered,fends_table=SDC2B1,interactions)
+print('SDC2B1 COUNTED')
+Sys.time()
 
 #Ensure that the matrices have the correct column and row names
 
@@ -165,6 +174,8 @@ row.names(N2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 colnames(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 
+print('Matrices made')
+Sys.time()
 
 #For loop cycles through each dataset and outputs heatmaps for each individually
 datasets<-c('N2B1_native','N2B2_native','SDC2B1_native','N2B1_ordered','N2B2_ordered','SDC2B1_ordered')
@@ -191,6 +202,8 @@ heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",de
           key.ylab=NULL, col = viridis(100), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score \n',output_key) )
 dev.off()
 }
+print('Each replicate is plotted')
+Sys.time()
 
 
 ###Aggregate datasets and compare between them
@@ -220,6 +233,9 @@ heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",de
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
           key.ylab=NULL, col = viridis(34), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by rank \n log2(SDC2/N2)') )
 dev.off()
+
+print('Aggregated datasets and log2ratios')
+Sys.time()
 
 
 ###How much is this just driven by proximity?
@@ -265,6 +281,9 @@ heatmap.2(outputmatrix_distbypos,dendrogram="none", Rowv=NA, Colv=NA,trace="none
           key.ylab=NULL, col = magma(50), scale="column", margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main='Distance between sites\n- ordered by position' )
 dev.off()
 
+print('Distance plots have been plotted')
+Sys.time()
+
 #Distribution of sites
 pdf('~/Desktop/heatmaps/rex_site_distribution.pdf')
 point_diff<-matrix(0,length(midpoints)-1,1)
@@ -282,3 +301,8 @@ plot(point_diff,xlab='Rex site pair', ylab='Distance between adjacent rex sites'
 plot(log10(point_diff),xlab='Rex site pair', ylab='log10(Distance between adjacent rex sites)', main ='Distance between rex sites')
 
 dev.off()
+
+print('Site distribution plotted')
+Sys.time()
+
+print('All done! Woop woop!')
