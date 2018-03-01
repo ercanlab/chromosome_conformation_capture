@@ -16,6 +16,11 @@
 #Example input for NYU HPC:
 ##Rscript ~/worms/scripts/site_specifc_interactions.R /scratch/cgsb/ercan/Defined_regions/rex_sites.bed 10000 > outputFile_1.Rout 2>&1
 
+#STILL WORKING ON:
+#AUTOSOMES
+#SDC2B2
+#RANDOM CONTROL/MEAN (MAYBE PUT AT BEGINNING). cAN USE IT WITH AN IF STATEMENT
+
 #Arguments reported to ouptut file.
 print('Script started')
 Sys.time()
@@ -80,21 +85,18 @@ dir.create(query_region[[1]][3])
 #Trial inputs
 #N2B1_intra<-read.table('~/Desktop/N2B1_intra_fends', stringsAsFactors=F)
 #N2B1_inter<-read.table('~/Desktop/N2B1_inter_fends', stringsAsFactors=F)
-N2B2_intra<-read.table('~/Desktop/N2B2_intra_fends', stringsAsFactors=F)
-N2B2_inter<-read.table('~/Desktop/N2B2_inter_fends', stringsAsFactors=F)
-SDC2B1_intra<-read.table('~/Desktop/SDC2B1_intra_fends', stringsAsFactors=F)
-SDC2B1_inter<-read.table('~/Desktop/SDC2B1_inter_fends', stringsAsFactors=F)
+#N2B2_intra<-read.table('~/Desktop/N2B2_intra_fends', stringsAsFactors=F)
+#N2B2_inter<-read.table('~/Desktop/N2B2_inter_fends', stringsAsFactors=F)
+#SDC2B1_intra<-read.table('~/Desktop/SDC2B1_intra_fends', stringsAsFactors=F)
+#SDC2B1_inter<-read.table('~/Desktop/SDC2B1_inter_fends', stringsAsFactors=F)
 
-N2B1<-rbind(N2B1_intra,N2B1_inter)
-N2B2<-rbind(N2B2_intra,N2B2_inter)
-SDC2B1<-rbind(SDC2B1_intra,SDC2B1_inter)
+#N2B1<-rbind(N2B1_intra,N2B1_inter)
+#N2B2<-rbind(N2B2_intra,N2B2_inter)
+#SDC2B1<-rbind(SDC2B1_intra,SDC2B1_inter)
 
-
-
-
-regions_of_interest<-read.table('~/Desktop/rex_sites.bed', stringsAsFactors=F)
-query_region<-list(c('~/Desktop/rex_sites.bed',20000,'~/Desktop/heatmaps/'))
-dir.create(query_region[[1]][3])
+#regions_of_interest<-read.table('~/Desktop/rex_sites.bed', stringsAsFactors=F)
+#query_region<-list(c('~/Desktop/rex_sites.bed',20000,'~/Desktop/heatmaps/'))
+#dir.create(query_region[[1]][3])
 
 #Read in the regions that we are really interested in
 regions_of_interest<-read.table(query_region[[1]][1], stringsAsFactors=F)
@@ -106,6 +108,7 @@ left_boundaries<-midpoints-(as.numeric(query_region[[1]][2])/2)
 right_boundaries<-midpoints+(as.numeric(query_region[[1]][2])/2)
 
 my_bed_file<-data.frame(regions_of_interest[,1],left_boundaries,right_boundaries, stringsAsFactors=F)
+####NEED TO MODIFY THIS SO THAT THE SPECIFIC FILE INTREREST CAN HANDLE MULTIPLE CHROMOMOSOMES
 my_bed_file_ordered<-my_bed_file[(order(my_bed_file[,2])),]
 
 #Function to subset my fend files e to specifically those that are of interest to you
