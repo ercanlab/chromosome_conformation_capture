@@ -164,7 +164,7 @@ row.names(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 
 
 #For loop cycles through each dataset and outputs heatmaps for each individually
-datasets<-c('N2B1_native','N2B2_native','SDC2B1_native')#,'N2B1_ordered','N2B2_ordered','SDC2B1_ordered')
+datasets<-c('N2B1_native','N2B2_native','SDC2B1_native','N2B1_ordered','N2B2_ordered','SDC2B1_ordered')
 
 for (i in 1:length(datasets)){
 outputmatrix<-get(datasets[i])
