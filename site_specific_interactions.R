@@ -29,7 +29,7 @@ args <- commandArgs(trailingOnly=TRUE)
 print(paste0('These are the args:',args))
 query_region<-args
 
-#Make sure correct dependencies are 
+#Make sure correct dependencies are loaded and installed
 if (!require("gplots")) {
   install.packages("gplots", dependencies = TRUE)
   library(gplots)
