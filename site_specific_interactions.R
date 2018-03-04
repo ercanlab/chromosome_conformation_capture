@@ -18,7 +18,6 @@
 
 #STILL WORKING ON:
 #AUTOSOMES
-#SDC2B2
 #RANDOM CONTROL/MEAN (MAYBE PUT AT BEGINNING). cAN USE IT WITH AN IF STATEMENT
 #make values relative to the rest of the genome
 
@@ -159,6 +158,13 @@ SDC2B1_ordered<-fend_matrix(my_bed_file_ordered,fends_table=SDC2B1,interactions)
 print('SDC2B1 COUNTED')
 Sys.time()
 
+interactions<-apply(my_bed_file,1,fend_hits,fends_table=SDC2B2)
+SDC2B2_native<-fend_matrix(my_bed_file,fends_table=SDC2B2,interactions)
+interactions<-apply(my_bed_file_ordered,1,fend_hits,fends_table=SDC2B2)
+SDC2B2_ordered<-fend_matrix(my_bed_file_ordered,fends_table=SDC2B2,interactions)
+print('SDC2B2 COUNTED')
+Sys.time()
+
 #Ensure that the matrices have the correct column and row names
 
 colnames(N2B1_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
@@ -167,6 +173,8 @@ colnames(N2B2_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(N2B2_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 colnames(SDC2B1_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(SDC2B1_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
+colnames(SDC2B2_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
+row.names(SDC2B2_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 
 colnames(N2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(N2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
@@ -174,12 +182,14 @@ colnames(N2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(N2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 colnames(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
+colnames(SDC2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
+row.names(SDC2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
 
 print('Matrices made')
 Sys.time()
 
 #For loop cycles through each dataset and outputs heatmaps for each individually
-datasets<-c('N2B1_native','N2B2_native','SDC2B1_native','N2B1_ordered','N2B2_ordered','SDC2B1_ordered')
+datasets<-c('N2B1_native','N2B2_native','SDC2B1_native','SDC2B2_native','N2B1_ordered','N2B2_ordered','SDC2B1_ordered','SDC2B2_ordered')
 
 for (i in 1:length(datasets)){
 outputmatrix<-get(datasets[i])
@@ -207,11 +217,11 @@ print('Each replicate is plotted')
 Sys.time()
 
 
-###Aggregate datasets and compare between them
+###Aggregate datasets and compare between them for ranked datasets
 N2_native_mean_norm<-((N2B1_native+N2B2_native)/2)/(sum(N2B1_native+N2B2_native)/2)
-SDC2B1_native_mean_norm<-(SDC2B1_native/sum(SDC2B1_native))
+SDC2_native_mean_norm<-((SDC2B1_native+SDC2B2_native)/2)/sum(SDC2B1_native+SDC2B2_native)/2)
 
-outputmatrix_ratio<-(SDC2B1_native_mean_norm/N2_native_mean_norm)
+outputmatrix_ratio<-(SDC2_native_mean_norm/N2_native_mean_norm)
 outputmatrix_ratio[is.na(outputmatrix_ratio)]<-0
 outputmatrix<-log2(outputmatrix_ratio)
 outputmatrix[which(outputmatrix=='-Inf')]<-0
@@ -235,8 +245,38 @@ heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",de
           key.ylab=NULL, col = viridis(34), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by rank \n log2(SDC2/N2)') )
 dev.off()
 
+
+###Aggregate datasets and compare between them for ordered datasets
+N2_ordered_mean_norm<-((N2B1_ordered+N2B2_ordered)/2)/(sum(N2B1_ordered+N2B2_ordered)/2)
+SDC2_ordered_mean_norm<-((SDC2B1_ordered+SDC2B2_ordered)/2)/sum(SDC2B1_ordered+SDC2B2_ordered)/2)
+
+outputmatrix_ratio<-(SDC2_ordered_mean_norm/N2_ordered_mean_norm)
+outputmatrix_ratio[is.na(outputmatrix_ratio)]<-0
+outputmatrix<-log2(outputmatrix_ratio)
+outputmatrix[which(outputmatrix=='-Inf')]<-0
+outputmatrix[which(outputmatrix=='Inf')]<-0
+
+#Log transformation
+positives<-which(outputmatrix>0)
+outputmatrix_log10<-outputmatrix
+outputmatrix_log10[positives]<-log10(outputmatrix[positives])
+
+#Plot the data
+pdf(paste0(query_region[[1]][3],'/logratio_byorder.pdf'))
+heatmap.2(outputmatrix,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
+          key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
+          key.ylab=NULL, col = viridis(69), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score by order \n log2(SDC2/N2)' ))
+dev.off()
+#Plot the data following log10 trasnformation
+pdf(paste0(query_region[[1]][3],'/log10_logratio_byorder.pdf'))
+heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
+          key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
+          key.ylab=NULL, col = viridis(34), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by order \n log2(SDC2/N2)') )
+dev.off()
+
 print('Aggregated datasets and log2ratios')
 Sys.time()
+
 
 
 ###How much is this just driven by proximity?
