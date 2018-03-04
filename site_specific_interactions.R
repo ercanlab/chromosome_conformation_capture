@@ -19,7 +19,6 @@
 #STILL WORKING ON:
 #AUTOSOMES
 #RANDOM CONTROL/MEAN (MAYBE PUT AT BEGINNING). cAN USE IT WITH AN IF STATEMENT
-#make values relative to the rest of the genome
 
 #Arguments reported to ouptut file.
 print('Script started')
