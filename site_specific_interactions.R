@@ -218,8 +218,16 @@ Sys.time()
 
 
 ###Aggregate datasets and compare between them for ranked datasets
-N2_native_mean_norm<-((N2B1_native+N2B2_native)/2)/(sum(N2B1_native+N2B2_native)/2)
-SDC2_native_mean_norm<-((SDC2B1_native+SDC2B2_native)/2)/sum(SDC2B1_native+SDC2B2_native)/2)
+
+#Need to normalise dataset to total counts
+N2B1_native_proportional<-N2B1_native/nrow(N2B1)
+N2B2_native_proportional<-N2B2_native/nrow(N2B2)
+SDC2B1_native_proportional<-SDC2B1_native/nrow(SDC2B1)
+SDC2B2_native_proportional<-SDC2B2_native/nrow(SDC2B2)
+
+#Merge datasets
+N2_native_mean_norm<-((N2B1_native_proportional+N2B2_native_proportional)/2)/(sum(N2B1_native_proportional+N2B2_native_proportional)/2)
+SDC2_native_mean_norm<-((SDC2B1_native_proportional+SDC2B2_native_proportional)/2)/sum(SDC2B1_native_proportional+SDC2B2_native_proportional)/2)
 
 outputmatrix_ratio<-(SDC2_native_mean_norm/N2_native_mean_norm)
 outputmatrix_ratio[is.na(outputmatrix_ratio)]<-0
@@ -247,8 +255,16 @@ dev.off()
 
 
 ###Aggregate datasets and compare between them for ordered datasets
-N2_ordered_mean_norm<-((N2B1_ordered+N2B2_ordered)/2)/(sum(N2B1_ordered+N2B2_ordered)/2)
-SDC2_ordered_mean_norm<-((SDC2B1_ordered+SDC2B2_ordered)/2)/sum(SDC2B1_ordered+SDC2B2_ordered)/2)
+
+#Need to normalise dataset to total counts
+N2B1_ordered_proportional<-N2B1_ordered/nrow(N2B1)
+N2B2_ordered_proportional<-N2B2_ordered/nrow(N2B2)
+SDC2B1_ordered_proportional<-SDC2B1_ordered/nrow(SDC2B1)
+SDC2B2_ordered_proportional<-SDC2B2_ordered/nrow(SDC2B2)
+
+#Merge datasets
+N2_ordered_mean_norm<-((N2B1_ordered_proportional+N2B2_ordered_proportional)/2)/(sum(N2B1_ordered_proportional+N2B2_ordered_proportional)/2)
+SDC2_ordered_mean_norm<-((SDC2B1_ordered_proportional+SDC2B2_ordered_proportional)/2)/sum(SDC2B1_ordered_proportional+SDC2B2_ordered_proportional)/2)
 
 outputmatrix_ratio<-(SDC2_ordered_mean_norm/N2_ordered_mean_norm)
 outputmatrix_ratio[is.na(outputmatrix_ratio)]<-0
