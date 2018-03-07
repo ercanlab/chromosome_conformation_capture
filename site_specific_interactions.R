@@ -17,8 +17,8 @@
 ##Rscript ~/worms/scripts/site_specifc_interactions.R /scratch/cgsb/ercan/Defined_regions/rex_sites.bed 10000 > outputFile_1.Rout 2>&1
 
 #STILL WORKING ON:
-#AUTOSOMES
-#RANDOM CONTROL/MEAN (MAYBE PUT AT BEGINNING). cAN USE IT WITH AN IF STATEMENT
+# AUTOSOMES
+# RANDOM CONTROL/MEAN (MAYBE PUT AT BEGINNING). cAN USE IT WITH AN IF STATEMENT
 
 #Arguments reported to ouptut file.
 print('Script started')
