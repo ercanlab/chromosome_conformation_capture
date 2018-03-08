@@ -14,7 +14,7 @@
 #C-output directory
 
 #Example input for NYU HPC:
-##Rscript ~/worms/scripts/site_specifc_interactions.R /scratch/cgsb/ercan/Defined_regions/rex_sites.bed 10000 > outputFile_1.Rout 2>&1
+##Rscript ~/worms/scripts/site_specifc_interactions.R /scratch/cgsb/ercan/Defined_regions/rex_sites.bed 10000 /scratch/mrp420/heatmap/ > outputFile_1.Rout 2>&1
 
 #STILL WORKING ON:
 # AUTOSOMES
@@ -175,14 +175,14 @@ row.names(SDC2B1_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 colnames(SDC2B2_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 row.names(SDC2B2_ordered)<-regions_of_interest[(order(my_bed_file[,2])),4]
 
-colnames(N2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-row.names(N2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-colnames(N2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-row.names(N2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-colnames(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-row.names(SDC2B1_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-colnames(SDC2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
-row.names(SDC2B2_native)<-regions_of_interest[(order(my_bed_file[,2])),4]
+colnames(N2B1_native)<-regions_of_interest[,4]
+row.names(N2B1_native)<-regions_of_interest[,4]
+colnames(N2B2_native)<-regions_of_interest[,4]
+row.names(N2B2_native)<-regions_of_interest[,4]
+colnames(SDC2B1_native)<-regions_of_interest[,4]
+row.names(SDC2B1_native)<-regions_of_interest[,4]
+colnames(SDC2B2_native)<-regions_of_interest[,4]
+row.names(SDC2B2_native)<-regions_of_interest[,4]
 
 print('Matrices made')
 Sys.time()
@@ -226,7 +226,7 @@ SDC2B2_native_proportional<-SDC2B2_native/nrow(SDC2B2)
 
 #Merge datasets
 N2_native_mean_norm<-((N2B1_native_proportional+N2B2_native_proportional)/2)/(sum(N2B1_native_proportional+N2B2_native_proportional)/2)
-SDC2_native_mean_norm<-((SDC2B1_native_proportional+SDC2B2_native_proportional)/2)/sum(SDC2B1_native_proportional+SDC2B2_native_proportional)/2)
+SDC2_native_mean_norm<-((SDC2B1_native_proportional+SDC2B2_native_proportional)/2)/(sum(SDC2B1_native_proportional+SDC2B2_native_proportional)/2)
 
 outputmatrix_ratio<-(SDC2_native_mean_norm/N2_native_mean_norm)
 outputmatrix_ratio[is.na(outputmatrix_ratio)]<-0
@@ -263,7 +263,7 @@ SDC2B2_ordered_proportional<-SDC2B2_ordered/nrow(SDC2B2)
 
 #Merge datasets
 N2_ordered_mean_norm<-((N2B1_ordered_proportional+N2B2_ordered_proportional)/2)/(sum(N2B1_ordered_proportional+N2B2_ordered_proportional)/2)
-SDC2_ordered_mean_norm<-((SDC2B1_ordered_proportional+SDC2B2_ordered_proportional)/2)/sum(SDC2B1_ordered_proportional+SDC2B2_ordered_proportional)/2)
+SDC2_ordered_mean_norm<-((SDC2B1_ordered_proportional+SDC2B2_ordered_proportional)/2)/(sum(SDC2B1_ordered_proportional+SDC2B2_ordered_proportional)/2)
 
 outputmatrix_ratio<-(SDC2_ordered_mean_norm/N2_ordered_mean_norm)
 outputmatrix_ratio[is.na(outputmatrix_ratio)]<-0
