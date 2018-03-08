@@ -82,9 +82,6 @@ N2B22015<-rbind(N2B22015_intra,N2B22015_inter)
 SDC2B12015<-rbind(SDC2B12015_intra,SDC2B12015_inter)
 SDC2B22015<-rbind(SDC2B22015_intra,SDC2B22015_inter)
 
-query_region<-list(c('/scratch/cgsb/ercan/Defined_regions/rex_sites.bed',20000,'/scratch/mrp420/heatmap'))
-dir.create(query_region[[1]][3])
-
 #Trial inputs
 #N2B1_intra<-read.table('~/Desktop/N2B1_intra_fends', stringsAsFactors=F)
 #N2B1_inter<-read.table('~/Desktop/N2B1_inter_fends', stringsAsFactors=F)
@@ -96,10 +93,13 @@ dir.create(query_region[[1]][3])
 #N2B1<-rbind(N2B1_intra,N2B1_inter)
 #N2B2<-rbind(N2B2_intra,N2B2_inter)
 #SDC2B1<-rbind(SDC2B1_intra,SDC2B1_inter)
-
+#query_region<-list(c('/scratch/cgsb/ercan/Defined_regions/rex_sites.bed',20000,'/scratch/mrp420/heatmap'))
 #regions_of_interest<-read.table('~/Desktop/rex_sites.bed', stringsAsFactors=F)
 #query_region<-list(c('~/Desktop/rex_sites.bed',20000,'~/Desktop/heatmaps/'))
 #dir.create(query_region[[1]][3])
+
+#Create output directory
+dir.create(query_region[[1]][3])
 
 #Read in the regions that we are really interested in
 regions_of_interest<-read.table(query_region[[1]][1], stringsAsFactors=F)
@@ -205,13 +205,13 @@ outputmatrix_log10[positives]<-log10(outputmatrix[positives])
 pdf(paste0(query_region[[1]][3],'/',output_key,'.pdf'))
 heatmap.2(outputmatrix,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
-          key.ylab=NULL, col = viridis(100), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score \n',output_key) )
+          key.ylab=NULL, col = viridis(30), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score \n',output_key) )
 dev.off()
 #Plot the data following log10 trasnformation
 pdf(paste0(query_region[[1]][3],'/',output_key,'_log10.pdf'))
 heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
-          key.ylab=NULL, col = viridis(100), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score \n',output_key) )
+          key.ylab=NULL, col = viridis(30), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score \n',output_key) )
 dev.off()
 }
 print('Each replicate is plotted')
@@ -245,13 +245,13 @@ outputmatrix_log10[positives]<-log10(outputmatrix[positives])
 pdf(paste0(query_region[[1]][3],'/logratio_byrank.pdf'))
 heatmap.2(outputmatrix,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
-          key.ylab=NULL, col = viridis(69), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score by rank \n log2(SDC2/N2)' ))
+          key.ylab=NULL, col = viridis(30), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score by rank \n log2(SDC2/N2)' ))
 dev.off()
 #Plot the data following log10 trasnformation
 pdf(paste0(query_region[[1]][3],'/log10_logratio_byrank.pdf'))
 heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
-          key.ylab=NULL, col = viridis(34), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by rank \n log2(SDC2/N2)') )
+          key.ylab=NULL, col = viridis(30), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by rank \n log2(SDC2/N2)') )
 dev.off()
 
 
@@ -282,13 +282,13 @@ outputmatrix_log10[positives]<-log10(outputmatrix[positives])
 pdf(paste0(query_region[[1]][3],'/logratio_byorder.pdf'))
 heatmap.2(outputmatrix,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
-          key.ylab=NULL, col = viridis(69), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score by order \n log2(SDC2/N2)' ))
+          key.ylab=NULL, col = viridis(30), margins=c(5,10), scale="column", lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0(' interaction score by order \n log2(SDC2/N2)' ))
 dev.off()
 #Plot the data following log10 trasnformation
 pdf(paste0(query_region[[1]][3],'/log10_logratio_byorder.pdf'))
 heatmap.2(outputmatrix_log10,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="interaction (Z-score)",key.title = NA,
-          key.ylab=NULL, col = viridis(34), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by order \n log2(SDC2/N2)') )
+          key.ylab=NULL, col = viridis(30), margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main=paste0('log10 interaction score by order \n log2(SDC2/N2)') )
 dev.off()
 
 print('Aggregated datasets and log2ratios')
@@ -315,7 +315,7 @@ outputmatrix_dist<-outputmatrix
 pdf(paste0(query_region[[1]][3],'/',output_key,'_distance_by_rank.pdf'))
 heatmap.2(outputmatrix_dist,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="distance (Z-score)",key.title = NA,
-          key.ylab=NULL, col = magma(50), scale="column", margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main='Distance between sites\n- ordered by rank' )
+          key.ylab=NULL, col = magma(30), scale="column", margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main='Distance between sites\n- ordered by rank' )
 dev.off()
 
 #Second graph according to the positional order
@@ -336,7 +336,7 @@ outputmatrix_distbypos<-outputmatrix
 pdf(paste0(query_region[[1]][3],'/',output_key,'_distance_by_position.pdf'))
 heatmap.2(outputmatrix_distbypos,dendrogram="none", Rowv=NA, Colv=NA,trace="none",density.info="none",
           key=TRUE,key.xlab="distance (Z-score)",key.title = NA,
-          key.ylab=NULL, col = magma(50), scale="column", margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main='Distance between sites\n- ordered by position' )
+          key.ylab=NULL, col = magma(30), scale="column", margins=c(5,10), lhei=c(1,4), lwid=c(1,4), keysize=0.1, key.par = list(cex=0.75), main='Distance between sites\n- ordered by position' )
 dev.off()
 
 print('Distance plots have been plotted')
