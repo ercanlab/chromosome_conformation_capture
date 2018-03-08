@@ -20,6 +20,7 @@
 # AUTOSOMES
 # RANDOM CONTROL/MEAN (MAYBE PUT AT BEGINNING). cAN USE IT WITH AN IF STATEMENT
 # Make relative to whole genome
+# 2015 datasets
 
 #Arguments reported to ouptut file.
 print('Script started')
