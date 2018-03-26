@@ -125,16 +125,17 @@ SDC2B22015_tables<-slid_bins(SDC2B22015)
 
 #Names for my lists of matrices
 datapoints_2017<-c('N2B1_tables','N2B2_tables','SDC2B1_tables','SDC2B2_tables')
-datapoints_2015<-c('N2B12015_tables','N2B22015_tables')#,'SDC2B12015_tables','SDC2B22015_tables')
+datapoints_2015<-c('N2B12015_tables','N2B22015_tables','SDC2B12015_tables','SDC2B22015_tables')
 
 #Mainpulate the top rex sites so they can be graphed 
 pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
 
 #define graph parameters
-library(wesanderson)
-col<-wes_palette("GrandBudapest2")
-
-
+if (!require("viridis")) {
+  install.packages("viridis")
+  library(viridis)
+}
+col<-viridis(4)
 
 #Plot out the raw counts 2015
 output1<-paste0(query_region[5],output_name,'_2015_raw_counts.pdf')
