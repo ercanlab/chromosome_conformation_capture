@@ -71,6 +71,9 @@ chr_specific<-restriciton_sites[which(restriciton_sites[,1]==query_region[3]),]
 index<-max(which(chr_specific[,3]<as.numeric(query_region[1]))) 
 left_boundary<-chr_specific[index,3]
 right_boundary<-chr_specific[index+1,2]
+  
+#Define an output name
+output_name<-paste0(query_region[6],'/',query_region[6],'_fragmentbait_',query_region[4],'bins')
 
 }else{
 
@@ -78,10 +81,13 @@ right_boundary<-chr_specific[index+1,2]
 #required if you want to look for a large region that is bigger then a bin. 
 left_boundary<-as.numeric(query_region[1])-(as.numeric(query_region[4])/2)
 right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
-}}
 
 #Define an output name
 output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins')
+  
+}}
+
+
 
 #Create a function that will run on each dataset, to create a matrix of interactions. These outputs will then be used to graph my 
 #viewpoint data
