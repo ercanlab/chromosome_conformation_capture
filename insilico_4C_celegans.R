@@ -18,7 +18,7 @@
 #G-Fragment
 
 #Example input for NYU HPC:
-##Rscript ~/worms/scripts/insilico_4C.R 11094135 11094136 chrX 10000 /scratch/mrp420/ rex8 > outputFile_1.Rout 2>&1
+##Rscript ~/worms/scripts/insilico_4C.R 11094135 11094136 chrX 10000 /scratch/mrp420/ rex8 fragment > outputFile_1.Rout 2>&1
 
 #Arguments reported to ouptut file.
 print('Script started')
@@ -29,7 +29,7 @@ query_region<-args
 query_region[c(1,2,4)]<-as.numeric(query_region[c(1,2,4)])
 
 #Test inputs - used for troubleshooting the script
-#query_region<-as.data.frame(c(806676,806677,'chrX',10000,'/scratch/mrp420/insilico/','rex40','fragemnt'), stringsAsFactors = F)
+#query_region<-as.data.frame(c(806676,806677,'chrX',10000,'/scratch/mrp420/insilico/','rex40','fragment'), stringsAsFactors = F)
 
 #Create output directory
 dir.create(paste0(query_region[5],'/'))
@@ -64,8 +64,8 @@ rex_sites<-read.table('/scratch/cgsb/ercan/Defined_regions/rex_sites', stringsAs
 print('Input files opened')
 
 #Is the binsize based on a single fragment or a bin size. 
-if length(query_region)==7{
-if query_region[7]=='fragment'{
+if (length(query_region)==7){
+if (query_region[7]=='fragment'){
 restriciton_sites<-read.table('/scratch/cgsb/ercan/Defined_regions/CelegansMboI.bed', stringsAsFactors=F)
 chr_specific<-restriciton_sites[which(restriciton_sites[,1]==query_region[3]),]
 index<-max(which(chr_specific[,3]<as.numeric(query_region[1]))) 
