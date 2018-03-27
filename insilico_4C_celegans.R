@@ -18,7 +18,7 @@
 #G-Fragment
 
 #Example input for NYU HPC:
-##Rscript ~/worms/scripts/insilico_4C.R 11094135 11094136 chrX 10000 /scratch/mrp420/ rex8 fragment > outputFile_1.Rout 2>&1
+##Rscript ~/worms/scripts/insilico_4C.R 806676 806677 chrX 10000 /scratch/mrp420/ rex40 fragment > /scratch/mrp420/reports/insilico_output.Rout 2>&1
 
 #Arguments reported to ouptut file.
 print('Script started')
@@ -231,7 +231,7 @@ dev.off()
 print('Sliding window chart plotted')
 Sys.time()
 
-print('All done! Woop woop!')
+
 
 #What about for normalised mean datasets?
 
@@ -467,4 +467,4 @@ text(pos+40, matrix(get(datapoints_2017[1])[[3]][3],1,17),cex=0.8, labels=rex_si
 dev.off()
 
 
-
+print('All done! Woop woop!')
