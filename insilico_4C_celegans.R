@@ -88,7 +88,7 @@ right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
 #Define an output name
 output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins')
   
-}}
+}else{output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins'}
 print(paste0('Output name is:', output_name))
 
 #Create a function that will run on each dataset, to create a matrix of interactions. These outputs will then be used to graph my 
