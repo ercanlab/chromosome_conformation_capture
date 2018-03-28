@@ -152,7 +152,7 @@ slid_bins<-function(input_table,input_sums) {
   }
   
   #Normalise full table to counts per million
-  full_table[,2]<-(full_table[,2]/input_sums)*as.numeric(query_region[4])0 
+  full_table[,2]<-(full_table[,2]/input_sums)*as.numeric(query_region[4])
   
   #Next need to create sliding average. 
   sliding_bins<-matrix(0,(bin_number-2),2)
