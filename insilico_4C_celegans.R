@@ -204,12 +204,11 @@ par(mfrow=c(2,2))
 for(i in 1:4){
 my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
 plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments(left_boundary+((right_boundary-left_boundary)/2), -2,left_boundary+((right_boundary-left_boundary)/2), y1 = -2.5, col=col[4], lwd=2)
-text(left_boundary+((right_boundary-left_boundary)/2), -3,cex=0.6, labels='Bait', srt=45)
-  
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -220,9 +219,11 @@ par(mfrow=c(2,2))
 for(i in 1:4){
 my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
 plot(get(datapoints_2017[i])[[2]][,1],log10(get(datapoints_2017[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -238,9 +239,11 @@ par(mfrow=c(2,2))
 for(i in 1:4){
 my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
 plot(get(datapoints_2015[i])[[1]][,1],log10(get(datapoints_2015[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -251,9 +254,11 @@ par(mfrow=c(2,2))
 for(i in 1:4){
 my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
 plot(get(datapoints_2017[i])[[1]][,1],log10(get(datapoints_2017[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -279,15 +284,19 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
                  
 dev.off()
 
@@ -299,15 +308,19 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
                  
 dev.off()
 
@@ -325,15 +338,19 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
                  
 dev.off()
 
@@ -345,15 +362,19 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
                  
 dev.off()
 
@@ -369,17 +390,21 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2017 data with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log2_2017_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
-segments(pos, 1,pos, y1 = 1.5, col=col[1], lwd=2)
+segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, 2,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 
-my_title<-paste0('Normalised Mean Counts in 2015 data with \n sliding window using ',query_region[[6]],' bait')
+my_title<-paste0('Log2 Normalised Mean Counts in 2015 data with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log2_2015_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
-segments(pos, 1,pos, y1 = 1.5, col=col[1], lwd=2)
+segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, 2,cex=0.6, labels=rex_sites[1:17,5], srt=45)
-abline(h=0, col='gray')        
+text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+abline(h=0, col='gray')       
 
 dev.off()
 
@@ -393,17 +418,21 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2017 data with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[2]][,1],log2_2017_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
-segments(pos, 1,pos, y1 = 1.5, col=col[1], lwd=2)
+segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, 2,cex=0.6, labels=rex_sites[1:17,5], srt=45)
-abline(h=0, col='gray')        
+text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+abline(h=0, col='gray')       
 
-my_title<-paste0('Normalised Mean Counts in 2015 data with \n counts window using ',query_region[[6]],' bait')
+my_title<-paste0('Log2 Normalised Mean Counts in 2015 data with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[2]][,1],log2_2015_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
-segments(pos, 1,pos, y1 = 1.5, col=col[1], lwd=2)
+segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, 2,cex=0.6, labels=rex_sites[1:17,5], srt=45)
-abline(h=0, col='gray')                
+text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+abline(h=0, col='gray')       
 dev.off()
 
 #First do mean datasets for sliding
@@ -420,15 +449,21 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
                  
 dev.off()
 
@@ -440,15 +475,21 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
                  
 dev.off()
 
@@ -462,15 +503,21 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
                  
 dev.off()
 
@@ -484,16 +531,51 @@ par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean sliding in N2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
 
 my_title<-paste0('Normalised Mean sliding in SDC2 with \n sliding window using ',query_region[[6]],' bait')
 plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
-segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
+segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
-                 
+text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -2.3, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.5,cex=0.6, labels='Bait', srt=45) 
+   
+ 
+#Log 2 all amalgameted data
+
+log2_sliding<-log2(mean_sliding_sdc2/mean_sliding_wt)
+log2_counts<-log2(mean_counts_sdc2/mean_counts_wt)
+
+output2<-paste0(query_region[5],output_name,'_log2_mean_norm.pdf')
+pdf(output2)
+par(mfrow=c(2,1))
+
+my_title<-paste0('Log2 Normalised Mean Counts in all data with \n counts window using ',query_region[[6]],' bait')
+plot(get(datapoints_2017[1])[[2]][,1],log2_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
+axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
+text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+abline(h=0, col='gray')       
+
+my_title<-paste0('Log2 Normalised Mean Counts in all data with \n sliding window using ',query_region[[6]],' bait')
+plot(get(datapoints_2017[1])[[2]][,1],log2_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
+axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
+text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
+segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+abline(h=0, col='gray')       
+dev.off()
+
+
 dev.off()
 
 
