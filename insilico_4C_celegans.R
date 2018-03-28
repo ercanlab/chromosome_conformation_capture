@@ -18,7 +18,7 @@
 #G-Fragment
 
 #Example input for NYU HPC:
-##Rscript ~/worms/scripts/insilico_4C.R 806676 806677 chrX 10000 /scratch/mrp420/ rex40 fragment > /scratch/mrp420/reports/insilico_output.Rout 2>&1
+##Rscript ~/worms/scripts/insilico_4C.R 806676 806677 chrX as.numeric(query_region[4]) /scratch/mrp420/ rex40 fragment > /scratch/mrp420/reports/insilico_output.Rout 2>&1
 
 #Arguments reported to ouptut file.
 print('Script started')
@@ -29,7 +29,7 @@ query_region<-args
 query_region[c(1,2,4)]<-as.numeric(query_region[c(1,2,4)])
 
 #Test inputs - used for troubleshooting the script
-#query_region<-as.data.frame(c(806676,806677,'chrX',10000,'/scratch/mrp420/insilico/','rex40','fragment'), stringsAsFactors = F)
+#query_region<-as.data.frame(c(806676,806677,'chrX',as.numeric(query_region[4]),'/scratch/mrp420/insilico/','rex40','fragment'), stringsAsFactors = F)
 
 #Create output directory
 print('Make directories')
@@ -68,104 +68,104 @@ print('Input files opened')
 #Is the binsize based on a single fragment or a bin size.
 print('Check what type of bait desired')
 if (length(query_region)==7){
-if (query_region[7]=='fragment'){
-restriciton_sites<-read.table('/scratch/cgsb/ercan/Defined_regions/CelegansMboI.bed', stringsAsFactors=F)
-chr_specific<-restriciton_sites[which(restriciton_sites[,1]==query_region[3]),]
-index<-max(which(chr_specific[,3]<as.numeric(query_region[1]))) 
-left_boundary<-(chr_specific[index,3])-1
-right_boundary<-(chr_specific[index+1,2])+1
-  
-#Define an output name
-output_name<-paste0(query_region[6],'/',query_region[6],'_fragmentbait_',query_region[4],'bins')
+  if (query_region[7]=='fragment'){
+    restriciton_sites<-read.table('/scratch/cgsb/ercan/Defined_regions/CelegansMboI.bed', stringsAsFactors=F)
+    chr_specific<-restriciton_sites[which(restriciton_sites[,1]==query_region[3]),]
+    index<-max(which(chr_specific[,3]<as.numeric(query_region[1]))) 
+    left_boundary<-(chr_specific[index,3])-1
+    right_boundary<-(chr_specific[index+1,2])+1
+    
+    #Define an output name
+    output_name<-paste0(query_region[6],'/',query_region[6],'_fragmentbait_',query_region[4],'bins')
+    
+  }else{
+    
+    #Define the region of interest based on the binsize. This utilises the midpoint. Some modification to this definition of the bins might be 
+    #required if you want to look for a large region that is bigger then a bin. 
+    left_boundary<-as.numeric(query_region[1])-(as.numeric(query_region[4])/2)
+    right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
+    
+    #Define an output name
+    output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins')
+    
+  }}
 
-}else{
-
-#Define the region of interest based on the binsize. This utilises the midpoint. Some modification to this definition of the bins might be 
-#required if you want to look for a large region that is bigger then a bin. 
-left_boundary<-as.numeric(query_region[1])-(as.numeric(query_region[4])/2)
-right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
-
-#Define an output name
-output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins')
-  
-}}
-  
 if (length(query_region)!=7){
-#Define the region of interest based on the binsize. This utilises the midpoint. Some modification to this definition of the bins might be 
-#required if you want to look for a large region that is bigger then a bin. 
-left_boundary<-as.numeric(query_region[1])-(as.numeric(query_region[4])/2)
-right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
+  #Define the region of interest based on the binsize. This utilises the midpoint. Some modification to this definition of the bins might be 
+  #required if you want to look for a large region that is bigger then a bin. 
+  left_boundary<-as.numeric(query_region[1])-(as.numeric(query_region[4])/2)
+  right_boundary<-as.numeric(query_region[2])+(as.numeric(query_region[4])/2)
+  
+  #Define an output name
+  output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins')
+}
 
-#Define an output name
-output_name<-paste0(query_region[6],'/',query_region[6],'_',query_region[4],'bins')
-                      }
-                                                 
 print(paste0('Output name is:', output_name))
 
 #Create a function that will run on each dataset, to create a matrix of interactions. These outputs will then be used to graph my 
 #viewpoint data
 slid_bins<-function(input_table,input_sums) {
-
-input_name<-deparse(substitute(input_table))
-
-#Output ID
-output_ID<-paste0(query_region[6],'_',input_name,'_',query_region[4],'bins')
-
-#Find all interactions from your reigon of interest
-left_hits<-which(input_table[,1]==query_region[3]&input_table[,2]>left_boundary&input_table[,2]<right_boundary)
-right_hits<-which(input_table[,3]==query_region[3]&input_table[,4]>left_boundary&input_table[,4]<right_boundary)
-
-#Remove all in which both ends are in your region of interest
-left_partner<-input_table[left_hits,4]
-right_partner<-input_table[right_hits,2]
-
-if(length(which(left_partner>left_boundary&left_partner<right_boundary))>0){
-left_ROI<-left_partner[-which(left_partner>left_boundary&left_partner<right_boundary)]
-  }else{
-  left_ROI<-left_partner}
-
-if(length(which(right_partner>left_boundary&right_partner<right_boundary))>0){
-right_ROI<-right_partner[-which(right_partner>left_boundary&right_partner<right_boundary)]
-  }else{
-  right_ROI<-right_partner}
   
-#Add both potential directions of inteaction together.
-total_ROI<-c(left_ROI,right_ROI)
-print('Region of interest defined')
-
-#Counts are generated for each 10Kb window
-counted_ROI<-table(floor(total_ROI/as.numeric(query_region[4])))
-
-#Mainpulate the rex sites so they can be graphed 
-pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
-
-#how many bins are there over the x chr
-bin_number<-17720000/as.numeric(query_region[4])
-full_table<-matrix(0,bin_number,2)
-full_table[,1]<-1:bin_number
-#get the distances that have values in the table
-my_header<-as.numeric(names(counted_ROI))
-#Put the values for the table in a dat matrix for every position.
-for (i in 1:length(my_header)){
-  index<-which(full_table[,1]==my_header[i])
-  full_table[index,2]<-counted_ROI[i]
-}
-
-#Normalise full table to counts per million
-full_table[,2]<-(full_table[,2]/input_sums)*100000 
+  input_name<-deparse(substitute(input_table))
   
-#Next need to create sliding average. 
-sliding_bins<-matrix(0,(bin_number-2),2)
-sliding_bins[,1]<-2:(bin_number-1)
-
-for (i in 1:nrow(sliding_bins)){
-  sliding_bins[i,2]<-(sum(full_table[i,2]+full_table[i+1,2], full_table[i+2,2]))/3
+  #Output ID
+  output_ID<-paste0(query_region[6],'_',input_name,'_',query_region[4],'bins')
+  
+  #Find all interactions from your reigon of interest
+  left_hits<-which(input_table[,1]==query_region[3]&input_table[,2]>left_boundary&input_table[,2]<right_boundary)
+  right_hits<-which(input_table[,3]==query_region[3]&input_table[,4]>left_boundary&input_table[,4]<right_boundary)
+  
+  #Remove all in which both ends are in your region of interest
+  left_partner<-input_table[left_hits,4]
+  right_partner<-input_table[right_hits,2]
+  
+  if(length(which(left_partner>left_boundary&left_partner<right_boundary))>0){
+    left_ROI<-left_partner[-which(left_partner>left_boundary&left_partner<right_boundary)]
+  }else{
+    left_ROI<-left_partner}
+  
+  if(length(which(right_partner>left_boundary&right_partner<right_boundary))>0){
+    right_ROI<-right_partner[-which(right_partner>left_boundary&right_partner<right_boundary)]
+  }else{
+    right_ROI<-right_partner}
+  
+  #Add both potential directions of inteaction together.
+  total_ROI<-c(left_ROI,right_ROI)
+  print('Region of interest defined')
+  
+  #Counts are generated for each 10Kb window
+  counted_ROI<-table(floor(total_ROI/as.numeric(query_region[4])))
+  
+  #Mainpulate the rex sites so they can be graphed 
+  pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
+  
+  #how many bins are there over the x chr
+  bin_number<-17720000/as.numeric(query_region[4])
+  full_table<-matrix(0,bin_number,2)
+  full_table[,1]<-1:bin_number
+  #get the distances that have values in the table
+  my_header<-as.numeric(names(counted_ROI))
+  #Put the values for the table in a dat matrix for every position.
+  for (i in 1:length(my_header)){
+    index<-which(full_table[,1]==my_header[i])
+    full_table[index,2]<-counted_ROI[i]
   }
-assign(paste0(input_name,'sliding_bins'), sliding_bins)
-assign(paste0(input_name,'full_table'),full_table)
-
-output<-list(get(paste0(input_name,'sliding_bins')),get(paste0(input_name,'full_table')))
-return(output)
+  
+  #Normalise full table to counts per million
+  full_table[,2]<-(full_table[,2]/input_sums)*as.numeric(query_region[4])0 
+  
+  #Next need to create sliding average. 
+  sliding_bins<-matrix(0,(bin_number-2),2)
+  sliding_bins[,1]<-2:(bin_number-1)
+  
+  for (i in 1:nrow(sliding_bins)){
+    sliding_bins[i,2]<-(sum(full_table[i,2]+full_table[i+1,2], full_table[i+2,2]))/3
+  }
+  assign(paste0(input_name,'sliding_bins'), sliding_bins)
+  assign(paste0(input_name,'full_table'),full_table)
+  
+  output<-list(get(paste0(input_name,'sliding_bins')),get(paste0(input_name,'full_table')))
+  return(output)
 }
 
 #Lets use the function to create the matrices of interactions across chrX
@@ -202,13 +202,13 @@ output1<-paste0(query_region[5],output_name,'_2015_raw_counts.pdf')
 pdf(output1)
 par(mfrow=c(2,2))
 for(i in 1:4){
-my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
-plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3.5,0))
-segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
-axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+  my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
+  plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
+  axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
+  text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+  segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+  text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -217,13 +217,13 @@ output1<-paste0(query_region[5],output_name,'_2017_raw_counts.pdf')
 pdf(output1)
 par(mfrow=c(2,2))
 for(i in 1:4){
-my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
-plot(get(datapoints_2017[i])[[2]][,1],log10(get(datapoints_2017[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3.5,0))
-segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
-axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+  my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
+  plot(get(datapoints_2017[i])[[2]][,1],log10(get(datapoints_2017[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
+  axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
+  text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+  segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+  text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -237,13 +237,13 @@ output2<-paste0(query_region[5],output_name,'_2015_slidingwindow.pdf')
 pdf(output2)
 par(mfrow=c(2,2))
 for(i in 1:4){
-my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
-plot(get(datapoints_2015[i])[[1]][,1],log10(get(datapoints_2015[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3.5,0))
-segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
-axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+  my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
+  plot(get(datapoints_2015[i])[[1]][,1],log10(get(datapoints_2015[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
+  axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
+  text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+  segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+  text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -252,13 +252,13 @@ output2<-paste0(query_region[5],output_name,'_2017_slidingwindow.pdf')
 pdf(output2)
 par(mfrow=c(2,2))
 for(i in 1:4){
-my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
-plot(get(datapoints_2017[i])[[1]][,1],log10(get(datapoints_2017[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3.5,0))
-segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
-axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+  my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
+  plot(get(datapoints_2017[i])[[1]][,1],log10(get(datapoints_2017[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
+  axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
+  text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+  segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+  text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 }
 dev.off()
 
@@ -283,21 +283,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 dev.off()
 
 
@@ -307,21 +307,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 dev.off()
 
 #First do mean datasets for counts
@@ -337,21 +337,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 dev.off()
 
 
@@ -361,21 +361,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 dev.off()
 
 
@@ -389,21 +389,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2017 data with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log2_2017_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[1]][,1],log2_2017_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -1,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2015 data with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log2_2015_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[1]][,1],log2_2015_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -1,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 
 dev.off()
@@ -417,21 +417,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2017 data with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_2017_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_2017_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -1,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2015 data with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_2015_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_2015_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -1,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 dev.off()
 
@@ -448,23 +448,23 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
+
 dev.off()
 
 
@@ -474,23 +474,23 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
+
 dev.off()
 
 #First do mean datasets for counts
@@ -502,23 +502,23 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
-                 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
+
 dev.off()
 
 
@@ -530,23 +530,23 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean sliding in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
 
 my_title<-paste0('Normalised Mean sliding in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -2.9,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -3.2, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -3.3,cex=0.6, labels='Bait', srt=45) 
-   
- 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2.9,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -3.2, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
+
+
 #Log 2 all amalgameted data
 
 log2_sliding<-log2(mean_sliding_sdc2/mean_sliding_wt)
@@ -557,21 +557,21 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in all data with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -1,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 
 my_title<-paste0('Log2 Normalised Mean Counts in all data with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(180as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
-segments((left_boundary+((right_boundary-left_boundary)/2))/10000, -1,(left_boundary+((right_boundary-left_boundary)/2))/10000, y1 = -1.5, col=col[4], lwd=2)
-text((left_boundary+((right_boundary-left_boundary)/2))/10000, -2,cex=0.6, labels='Bait', srt=45) 
+segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -1,(left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), y1 = -1.5, col=col[4], lwd=2)
+text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -2,cex=0.6, labels='Bait', srt=45) 
 abline(h=0, col='gray')       
 dev.off()
 
