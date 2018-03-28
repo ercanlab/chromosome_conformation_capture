@@ -164,7 +164,7 @@ for (i in 1:nrow(sliding_bins)){
 assign(paste0(input_name,'sliding_bins'), sliding_bins)
 assign(paste0(input_name,'full_table'),full_table)
 
-output<-list(get(paste0(input_name,'sliding_bins')),get(paste0(input_name,'full_table')),dashpoint)
+output<-list(get(paste0(input_name,'sliding_bins')),get(paste0(input_name,'full_table')))
 return(output)
 }
 
@@ -183,8 +183,11 @@ SDC2B22015_tables<-slid_bins(SDC2B22015,SDC2B22015_sum)
 datapoints_2017<-c('N2B1_tables','N2B2_tables','SDC2B1_tables','SDC2B2_tables')
 datapoints_2015<-c('N2B12015_tables','N2B22015_tables','SDC2B12015_tables','SDC2B22015_tables')
 
+
 #Mainpulate the top rex sites so they can be graphed 
-pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
+final_rex_sites<-c(rex_sites[1:17,5],'rex29')
+pos<-c(rex_sites[1:17,2],10756306)/as.numeric(query_region[4])
+
 
 #define graph parameters
 if (!require("viridis")) {
@@ -203,7 +206,10 @@ my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
 plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (10000 Kb)', xlim=c(0,1801), ylim=c(-3,0))
 segments(pos, -1,pos, y1 = -1.5, col=col[1], lwd=2)
 axis(1, at=seq(0,1800,by=200), labels=seq(0,1800,by=200))
-text(pos+40, -0.5,cex=0.6, labels=rex_sites[1:17,5], srt=45)
+text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
+segments(left_boundary+((right_boundary-left_boundary)/2), -2,left_boundary+((right_boundary-left_boundary)/2), y1 = -2.5, col=col[4], lwd=2)
+text(left_boundary+((right_boundary-left_boundary)/2), -3,cex=0.6, labels='Bait', srt=45)
+  
 }
 dev.off()
 
