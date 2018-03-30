@@ -18,7 +18,7 @@
 #G-Fragment
 
 #Example input for NYU HPC:
-##Rscript ~/worms/scripts/insilico_4C.R 806676 806677 chrX as.numeric(query_region[4]) /scratch/mrp420/ rex40 fragment > /scratch/mrp420/reports/insilico_output.Rout 2>&1
+##Rscript ~/worms/scripts/insilico_4C.R 806676 806677 chrX 5000 /scratch/mrp420/ rex40 fragment > /scratch/mrp420/reports/insilico_output.Rout 2>&1
 
 #Arguments reported to ouptut file.
 print('Script started')
@@ -29,7 +29,7 @@ query_region<-args
 query_region[c(1,2,4)]<-as.numeric(query_region[c(1,2,4)])
 
 #Test inputs - used for troubleshooting the script
-#query_region<-as.data.frame(c(806676,806677,'chrX',as.numeric(query_region[4]),'/scratch/mrp420/insilico/','rex40','fragment'), stringsAsFactors = F)
+#query_region<-as.data.frame(c(806676,806677,'chrX',5000,'/scratch/mrp420/insilico/','rex40'), stringsAsFactors = F)
 
 #Create output directory
 print('Make directories')
@@ -136,7 +136,7 @@ slid_bins<-function(input_table,input_sums) {
   #Counts are generated for each 10Kb window
   counted_ROI<-table(floor(total_ROI/as.numeric(query_region[4])))
   
-  #Mainpulate the rex sites so they can be graphed 
+  #Manipulate the rex sites so they can be graphed 
   pos<-rex_sites[1:17,2]/as.numeric(query_region[4])
   
   #how many bins are there over the x chr
@@ -203,7 +203,7 @@ pdf(output1)
 par(mfrow=c(2,2))
 for(i in 1:4){
   my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
-  plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  plot(get(datapoints_2015[i])[[2]][,1],log10(get(datapoints_2015[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3.5,0))
   segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
   at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
   text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -218,7 +218,7 @@ pdf(output1)
 par(mfrow=c(2,2))
 for(i in 1:4){
   my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
-  plot(get(datapoints_2017[i])[[2]][,1],log10(get(datapoints_2017[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  plot(get(datapoints_2017[i])[[2]][,1],log10(get(datapoints_2017[i])[[2]][,2]),main=my_title,type='l', xaxt = "n", ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3.5,0))
   segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
   at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
   text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -238,7 +238,7 @@ pdf(output2)
 par(mfrow=c(2,2))
 for(i in 1:4){
   my_title<-strsplit(datapoints_2015[i],'_')[[1]][1]
-  plot(get(datapoints_2015[i])[[1]][,1],log10(get(datapoints_2015[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  plot(get(datapoints_2015[i])[[1]][,1],log10(get(datapoints_2015[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3.5,0))
   segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
   at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
   text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -253,7 +253,7 @@ pdf(output2)
 par(mfrow=c(2,2))
 for(i in 1:4){
   my_title<-strsplit(datapoints_2017[i],'_')[[1]][1]
-  plot(get(datapoints_2017[i])[[1]][,1],log10(get(datapoints_2017[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+  plot(get(datapoints_2017[i])[[1]][,1],log10(get(datapoints_2017[i])[[1]][,2]),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3.5,0))
   segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
   at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
   text(pos+40, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -283,7 +283,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -291,7 +291,7 @@ segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_reg
 text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -307,7 +307,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -315,7 +315,7 @@ segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_reg
 text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -337,7 +337,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -345,7 +345,7 @@ segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_reg
 text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_2017_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -361,7 +361,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -369,7 +369,7 @@ segments((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_reg
 text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[4]), -3.3,cex=0.6, labels='Bait', srt=45) 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[2]][,1],log10(mean_2015_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -389,7 +389,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2017 data with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log2_2017_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[1]][,1],log2_2017_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
@@ -398,7 +398,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 abline(h=0, col='gray')       
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2015 data with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log2_2015_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[1]][,1],log2_2015_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
@@ -417,7 +417,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2017 data with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_2017_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_2017_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
@@ -426,7 +426,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 abline(h=0, col='gray')       
 
 my_title<-paste0('Log2 Normalised Mean Counts in 2015 data with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_2015_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_2015_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
@@ -448,7 +448,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -457,7 +457,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_2017_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -474,7 +474,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -483,7 +483,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2015[1])[[1]][,1],log10(mean_2015_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -502,7 +502,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean Counts in N2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -511,7 +511,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 
 
 my_title<-paste0('Normalised Mean Counts in SDC2 with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[2]][,1],log10(mean_counts_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -533,7 +533,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Normalised Mean sliding in N2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_wt),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -542,7 +542,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 
 
 my_title<-paste0('Normalised Mean sliding in SDC2 with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
+plot(get(datapoints_2017[1])[[1]][,1],log10(mean_sliding_sdc2),main=my_title, xaxt = "n",type='l', ylab='log10(CPM per 10kb bin)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))),  ylim=c(-3.5,0))
 segments(pos, -1,pos, y1 = -1.3, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, -0.5,cex=0.6, labels=final_rex_sites, srt=45)
@@ -560,7 +560,7 @@ pdf(output2)
 par(mfrow=c(2,1))
 
 my_title<-paste0('Log2 Normalised Mean Counts in all data with \n counts window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_counts,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
@@ -569,7 +569,7 @@ text((left_boundary+((right_boundary-left_boundary)/2))/as.numeric(query_region[
 abline(h=0, col='gray')       
 
 my_title<-paste0('Log2 Normalised Mean Counts in all data with \n sliding window using ',query_region[[6]],' bait')
-plot(get(datapoints_2017[1])[[2]][,1],log2_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,(as.numeric(query_region[4])/as.numeric(query_region[4]))), ylim=c(-3,3))
+plot(get(datapoints_2017[1])[[2]][,1],log2_sliding,main=my_title, xaxt = "n",type='l', ylab='log2(sdc2/wt)', xlab='Chromosome position (as.numeric(query_region[4]) Kb)', xlim=c(0,((18000000/as.numeric(query_region[4]))), ylim=c(-3,3))
 segments(pos, 1,pos, y1 = 1.5, col=col[2], lwd=2)
 at=seq(0,(18000000/as.numeric(query_region[4])),by=(2000000/as.numeric(query_region[4])))
 text(pos+20, 2,cex=0.6, labels=final_rex_sites, srt=45)
