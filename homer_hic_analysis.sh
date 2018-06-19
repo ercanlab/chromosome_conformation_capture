@@ -191,7 +191,7 @@ echo 'End PCA with epigentic info' $(date +%r)
 
 #Juicebox
 echo 'Make juicebox file' $(date +%r)
-/share/apps/homer/4.10.1/intel/bin/tagDir2hicFile.pl /scratch/mrp420/homer_hic/SRR1665088/ -juicer auto -genome ce10 -p 10 -rpath /share/apps/r/3.4.2/intel/bin/R
+/share/apps/homer/4.10.1/intel/bin/tagDir2hicFile.pl . -juicer auto -genome ce10 -p 10 -rpath /share/apps/r/3.4.2/intel/bin/R
 echo 'End juicebox file' $(date +%r)
 
 #------------------------------------------------------------------------------#
