@@ -4,9 +4,9 @@
 #SBATCH --job-name=homer_hic
 #SBATCH --output=/scratch/mrp420/reports/slurm_homerhic_%j.out
 #SBATCH --error=/scratch/mrp420/reports/slurm_homerhic_%j.err
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
-#SBATCH --mem=64GB
+#SBATCH --mem=125GB
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mrp420@nyu.edu
 
@@ -32,12 +32,13 @@
 # FQ1='/scratch/cgsb/ercan/hic/newmeyer/SRR1665088_1.fastq',\
 # FQ2='/scratch/cgsb/ercan/hic/newmeyer/SRR1665082_2.fastq',\
 # DIG='GATC',\
+# GENOME='sacCer3' #or ce10 or dm6
+# BOWTIE='~/yeast/genomes/SK1_yue/SK1_yue'
 # ~/yeast/scripts/homer_hic.sh
 
 #------------------------------------------------------------------------------#
 #                                  Functions                                   #
 #------------------------------------------------------------------------------#
-
 function elapsed_time() {
     ENDTIME=$(date +%s)
 
@@ -58,6 +59,8 @@ function check_arg() {
     then
         echo ">>>>> Please provide values for all required arguments"
         exit 1
+    else
+        echo "Input argument is $1"
     fi
 }
 
@@ -70,6 +73,8 @@ check_arg $EXPID
 check_arg $FQ1
 check_arg $FQ2
 check_arg $DIG
+check_arg $GENOME
+check_arg $BOWTIE
 
 # Check input files / dirs
 [ -f $FQ1 ] || { echo "Could not find file: $FQ1"; exit 1; }
@@ -115,8 +120,8 @@ echo 'End Trimming' $(date +%r)
 
 # Map trimmed files to the genome seperately 
 echo 'Start mapping' $(date +%r)
-bowtie2 --local -p 20 -x ~/worms/genomes/WS220_B2/WS220 -U ${FQ1}.trimmed > ${output_dir}/${EXPID}_1.sam
-bowtie2 --local -p 20 -x ~/worms/genomes/WS220_B2/WS220 -U ${FQ2}.trimmed > ${output_dir}/${EXPID}_2.sam
+bowtie2 --local -p 20 -x $BOWTIE -U ${FQ1}.trimmed > ${output_dir}/${EXPID}_1.sam
+bowtie2 --local -p 20 -x $BOWTIE -U ${FQ2}.trimmed > ${output_dir}/${EXPID}_2.sam
 echo 'End mapping' $(date +%r)
 
 #Clean up
@@ -144,8 +149,10 @@ echo 'End tag assignment' $(date +%r)
 echo 'Filter tag assignment' $(date +%r)
 cp unfiltered/* .
 
-makeTagDirectory . -update -genome ce10 -removePEbg -restrictionSite $DIG -removeSelfLigation -removeSpikes 10000 5 -tbp 1
+makeTagDirectory . -update -genome $GENOME -removePEbg -restrictionSite $DIG -removeSelfLigation -removeSpikes 10000 5 -tbp 1
 echo 'Filter tag assignment' $(date +%r)
+
+###I'm here!
 
 #------------------------------------------------------------------------------#
 #    Normalise the matrix and create a model fro background interactions       #
@@ -167,8 +174,14 @@ echo 'Binning and background subtraction' $(date +%r)
 
 # Distance normalized
 echo 'Binning and background subtraction' $(date +%r)
-analyzeHiC . -res 10000 -bgonly -cpu 8 -distNorm -o ${EXPID}_distnorm_output_matrix.txt
+analyzeHiC . -res 10000 -cpu 8 -norm -o ${EXPID}_distnorm_output_matrix.txt                              echo 'Binning and background subtraction' $(date +%r)
+
+#Pearson correlation matrices
+echo 'Pearson correlation' $(date +%r)
+analyzeHiC . -res 10000 -cpu 8 -corr -o ${EXPID}_pearson_correlation_output_matrix.txt
 echo 'Binning and background subtraction' $(date +%r)
+
+
 
 #------------------------------------------------------------------------------#
 #            Do PCA analysis to extract compartment coordinates                #
@@ -176,7 +189,7 @@ echo 'Binning and background subtraction' $(date +%r)
 
 # PCA
 echo 'Start PCA' $(date +%r)
-/share/apps/homer/4.10.1/intel/bin/runHiCpca.pl pcaOut . -rpath /share/apps/r/3.4.2/intel/bin/R -res 25000 -superRes 50000 -genome ce10 -cpu 10
+/share/apps/homer/4.10.1/intel/bin/runHiCpca.pl pcaOut . -rpath /share/apps/r/3.4.2/intel/bin/R -res 25000 -superRes 50000 -genome $GENOME -cpu 10
 echo 'End PCA' $(date +%r)
 
 # PCA
@@ -191,7 +204,7 @@ echo 'End PCA with epigentic info' $(date +%r)
 
 #Juicebox
 echo 'Make juicebox file' $(date +%r)
-/share/apps/homer/4.10.1/intel/bin/tagDir2hicFile.pl . -juicer auto -genome ce10 -p 10 -rpath /share/apps/r/3.4.2/intel/bin/R
+/share/apps/homer/4.10.1/intel/bin/tagDir2hicFile.pl . -juicer auto -genome $GENOME -p 10 -rpath /share/apps/r/3.4.2/intel/bin/R
 echo 'End juicebox file' $(date +%r)
 
 #------------------------------------------------------------------------------#
@@ -201,6 +214,12 @@ echo 'End juicebox file' $(date +%r)
 echo 'Check for signicant reads' $(date +%r)
 analyzeHiC . -res 10000 -interactions ${EXPID}_significant_interactions.txt -nomatrix
 echo 'Check for signicant reads' $(date +%r)
+
+#------------------------------------------------------------------------------#
+#                        Remove extra files                                    #
+#------------------------------------------------------------------------------#
+
+rm *.sam
 
 
 #------------------------------------------------------------------------------#
@@ -212,6 +231,5 @@ echo "Completed pipeline in $ELAPSEDTIME"
 echo \
 "------------------------------------------------------------------------------"
 
+
 exit 0;
-
-
